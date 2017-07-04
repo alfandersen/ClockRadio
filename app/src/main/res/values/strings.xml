@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Clock Radio</string>
+
+    <string-array name="radio_stations">
+        <item>Nyheder</item>
+        <item>P1</item>
+        <item>P2</item>
+        <item>P3</item>
+        <item>P4</item>
+        <item>P5</item>
+        <item>P6 Beat</item>
+        <item>P7 Mix</item>
+        <item>P8 Jazz</item>
+    </string-array>
+
+</resources>
