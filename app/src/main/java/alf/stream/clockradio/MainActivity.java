@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private ToggleButton playToggle;
     private ProgressBar loadingProgressBar;
 
+    BroadcastReceiverManager broadcastReceiverManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +131,10 @@ public class MainActivity extends AppCompatActivity {
         // Alarm Manager
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmIntent = new Intent(context, AlarmReceiver.class);
-//        Bundle bundle = new Bundle();
+
+
+        // Broadcast Receiver
+        broadcastReceiverManager = new BroadcastReceiverManager(context, this);
     }
 
     /**
@@ -175,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToTimePicker(){
-        // TODO: Add extra: time shown in app to set default time.
         Intent intent = new Intent(getApplicationContext(),TimePickerActivity.class);
         startActivity(intent);
     }
@@ -198,6 +202,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void activatePlayButton() {
+        if(!playToggle.isChecked())
+            playToggle.setChecked(true);
+    }
+
     public void showLoadingBar(final boolean show){
         this.runOnUiThread(new Runnable() {
             @Override
@@ -212,11 +221,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         radioHandler.unBind();
+        broadcastReceiverManager.unregister();
     }
-
-    public boolean playToggleIsChecked() {
-        return playToggle.isChecked();
-    }
-
-
 }

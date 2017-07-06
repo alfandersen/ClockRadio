@@ -13,4 +13,10 @@
         <item>P8 Jazz</item>
     </string-array>
 
+    <!--Intent Filters-->
+    <string name="play_started_filter">play_started_filter</string>
+    <string name="loading_station_filter">loading_station_filter</string>
+
+    <!--Intent Data-->
+    <string name="loading_station_boolean">loading_station_boolean</string>
 </resources>

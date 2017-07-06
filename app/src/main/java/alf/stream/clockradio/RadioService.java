@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 /**
@@ -39,9 +40,8 @@ public class RadioService extends Service {
         else {
             String newStation = intent.getStringExtra("stationPath");
 
-            if (station == null || newStation != station || player == null || !player.isPlaying()) {
+            if (station == null || !station.equals(newStation) || player == null || !player.isPlaying()) {
                 station = newStation;
-                stopPlayer();
                 startPlayer();
             }
         }
@@ -53,8 +53,18 @@ public class RadioService extends Service {
             @Override
             public void run() {
                 if(station != null) {
+                    LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
+                    lbm.sendBroadcast(new Intent(getResources().getString(R.string.loading_station_filter))
+                                    .putExtra(getResources().getString(R.string.loading_station_boolean),true));
+
+                    stopPlayer();
                     player = MediaPlayer.create(context, Uri.parse(station));
                     player.start();
+
+                    lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_started_filter)));
+                    lbm.sendBroadcast(new Intent(getResources().getString(R.string.loading_station_filter))
+                                    .putExtra(getResources().getString(R.string.loading_station_boolean),false));
+
                     player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
                         public void onCompletion(MediaPlayer mediaPlayer) {
