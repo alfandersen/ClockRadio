@@ -31,14 +31,14 @@ public class RadioService extends Service {
 
     /**
      * IMPORTANT!!! Remember to:
-     * intent.putExtra("stationPath", "blablabla.m3u8");
+     * intent.putExtra(context.getString(R.string.station_path_string), "blablabla.m3u8");
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // TODO: Backup Alarm in case of null intent or no internet.
         if(intent == null) Log.e ("intent: ", "null");
         else {
-            String newStation = intent.getStringExtra("stationPath");
+            String newStation = intent.getStringExtra(context.getString(R.string.station_path_string));
 
             if (station == null || !station.equals(newStation) || player == null || !player.isPlaying()) {
                 station = newStation;
@@ -54,8 +54,8 @@ public class RadioService extends Service {
             public void run() {
                 if(station != null) {
                     LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
-                    lbm.sendBroadcast(new Intent(getResources().getString(R.string.loading_station_filter))
-                                    .putExtra(getResources().getString(R.string.loading_station_boolean),true));
+                    lbm.sendBroadcast(new Intent(context.getString(R.string.loading_station_filter))
+                                    .putExtra(context.getString(R.string.loading_station_boolean),true));
 
                     stopPlayer();
                     player = MediaPlayer.create(context, Uri.parse(station));

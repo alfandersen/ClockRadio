@@ -3,6 +3,7 @@ package alf.stream.clockradio;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -20,9 +21,14 @@ public class AlarmReceiver extends BroadcastReceiver {
         String[] stationUrls = context.getResources().getStringArray(R.array.streams);
         int currentStation = PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getInt("savedStation", 0);
+                .getInt(context.getString(R.string.station_path_string), 0);
 
-        radioIntent.putExtra("stationPath",stationUrls[currentStation]);
+        radioIntent.putExtra(context.getString(R.string.station_path_string),stationUrls[currentStation]);
+
+
+        PackageManager pm = context.getPackageManager();
+        Intent launchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
+        context.startActivity(launchIntent);
 
         context.startService(radioIntent);
     }

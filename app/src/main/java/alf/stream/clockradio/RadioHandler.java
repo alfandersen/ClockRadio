@@ -38,7 +38,7 @@ public class RadioHandler {
         stationUrls = context.getResources().getStringArray(R.array.streams);
         currentStation = PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getInt("savedStation", 0);
+                .getInt(context.getString(R.string.saved_station), 0);
         if(currentStation < 0 || currentStation >= stationUrls.length)
             currentStation = 0;
 
@@ -47,7 +47,7 @@ public class RadioHandler {
 
     private void updateCurrentStationUrl(){
         currentStationUrl = stationUrls[currentStation];
-        intent.putExtra("stationPath",currentStationUrl);
+        intent.putExtra(context.getString(R.string.station_path_string),currentStationUrl);
         saveStation();
     }
 
@@ -68,7 +68,7 @@ public class RadioHandler {
         SharedPreferences.Editor editor = PreferenceManager.
                 getDefaultSharedPreferences(context).
                 edit();
-        editor.putInt("savedStation", currentStation);
+        editor.putInt(context.getString(R.string.saved_station), currentStation);
         editor.apply();
     }
 
