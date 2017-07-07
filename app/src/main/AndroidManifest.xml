@@ -15,22 +15,15 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
+            android:screenOrientation="portrait"></activity>
 
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
-
-        <meta-data>tools:replace="android:value"</meta-data>
         <receiver android:name=".AlarmReceiver" />
 
         <service android:name=".RadioService" />
 
         <activity
             android:name=".TimePickerActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity android:name=".OverviewActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,6 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".EditAlarmActivity"></activity>
     </application>
 
 </manifest>
