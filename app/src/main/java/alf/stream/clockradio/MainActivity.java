@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
@@ -14,9 +15,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -36,10 +37,10 @@ public class MainActivity extends AppCompatActivity {
 
     private ToggleButton alarmToggle;
     private TextView alarmTimeTextView;
-    private Button editTimeButton;
 
     private Spinner stationSpinner;
     private ToggleButton playToggle;
+    private SeekBar volumeSeekBar;
     private ProgressBar loadingProgressBar;
 
     BroadcastReceiverManager broadcastReceiverManager;
@@ -53,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
         radioHandler = new RadioHandler(context);
 
-        // TODO: Loading Animation
         loadingProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
 
 
@@ -64,8 +64,7 @@ public class MainActivity extends AppCompatActivity {
         stationSpinner.setAdapter(adapter);
         stationSpinner.setSelection(PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getInt("savedStation", 0));
-        Log.e("selected: ", stationSpinner.getSelectedItemPosition()+"");
+                .getInt(getString(R.string.saved_station_int), 0));
 
         stationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -114,7 +113,36 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b) radioHandler.startPlayBack();
-                else radioHandler.stopPlayBack();
+                else {
+                    radioHandler.stopPlayBack();
+                    updateSpinnerColor(false);
+                }
+            }
+        });
+
+        // Volume Seek Bar
+        volumeSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
+        final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        volumeSeekBar.setMax(audioManager
+                .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+
+
+        volumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onStopTrackingTouch(SeekBar arg0)
+            {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar arg0)
+            {
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar arg0, int progress, boolean arg2)
+            {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
             }
         });
 
@@ -184,22 +212,17 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void updateSpinnerColor(final boolean isPlaying) {
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                TextView playingStation = (TextView) stationSpinner.getChildAt(0);
-                if (playingStation != null) {
-                    if (isPlaying) {
-                        playingStation.setTextColor(Color.BLACK);
-                        stationSpinner.setBackgroundColor(ContextCompat.getColor(context, R.color.on));
-                    } else {
-                        playingStation.setTextColor(Color.WHITE);
-                        stationSpinner.setBackgroundColor(ContextCompat.getColor(context, R.color.off));
-                    }
-                }
+    public void updateSpinnerColor(boolean isPlaying) {
+        TextView playingStation = (TextView) stationSpinner.getChildAt(0);
+        if (playingStation != null) {
+            if (isPlaying) {
+                playingStation.setTextColor(Color.BLACK);
+                stationSpinner.setBackgroundColor(ContextCompat.getColor(context, R.color.on));
+            } else {
+                playingStation.setTextColor(Color.WHITE);
+                stationSpinner.setBackgroundColor(ContextCompat.getColor(context, R.color.off));
             }
-        });
+        }
     }
 
     public void activatePlayButton() {
@@ -207,14 +230,9 @@ public class MainActivity extends AppCompatActivity {
             playToggle.setChecked(true);
     }
 
-    public void showLoadingBar(final boolean show){
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(show) loadingProgressBar.setVisibility(loadingProgressBar.VISIBLE);
-                else loadingProgressBar.setVisibility(loadingProgressBar.INVISIBLE);
-            }
-        });
+    public void showLoadingBar(boolean show){
+        if(show) loadingProgressBar.setVisibility(loadingProgressBar.VISIBLE);
+        else loadingProgressBar.setVisibility(loadingProgressBar.GONE);
     }
 
     @Override

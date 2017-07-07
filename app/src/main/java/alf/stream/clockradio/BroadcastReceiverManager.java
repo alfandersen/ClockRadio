@@ -23,6 +23,7 @@ public class BroadcastReceiverManager {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mainActivity.activatePlayButton();
+                mainActivity.updateSpinnerColor(true);
 
             }
         };

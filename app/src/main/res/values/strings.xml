@@ -20,5 +20,7 @@
     <!--Intent Data-->
     <string name="loading_station_boolean">loading_station_boolean</string>
     <string name="station_path_string">station_path_string</string>
-    <string name="saved_station">saved_station</string>
+
+    <!--Saved Variables-->
+    <string name="saved_station_int">saved_station_int</string>
 </resources>

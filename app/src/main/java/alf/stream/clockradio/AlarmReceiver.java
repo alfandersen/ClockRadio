@@ -21,7 +21,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         String[] stationUrls = context.getResources().getStringArray(R.array.streams);
         int currentStation = PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getInt(context.getString(R.string.station_path_string), 0);
+                .getInt(context.getString(R.string.saved_station_int), 0);
 
         radioIntent.putExtra(context.getString(R.string.station_path_string),stationUrls[currentStation]);
 
