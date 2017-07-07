@@ -1,4 +1,14 @@
 
+# Created by Alf Andersen
+
+# Test classes
+/app/src/androidTest
+/app/src/test
+
+# End of Alf Andersen
+
+# ----------------------------------------------------------------
+
 # Created by https://www.gitignore.io/api/androidstudio
 
 ### AndroidStudio ###
