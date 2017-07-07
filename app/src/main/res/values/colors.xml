@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="off">#5a595b</color>
-    <color name="on">#80cbc4</color>
+    <color name="colorPrimary">#cccccc</color>
+    <color name="colorPrimaryDark">#494c4e</color>
+    <color name="colorAccent">#80cbc4</color>
+    <color name="off_bright">@color/colorPrimary</color>
+    <color name="off_dark">@color/colorPrimaryDark</color>
+    <color name="on">@color/colorAccent</color>
 </resources>
