@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/alarmRowLinearLayout"
+    android:id="@+id/layout_AlarmRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
@@ -11,7 +11,7 @@
     android:padding="4dp">
 
     <CheckBox
-        android:id="@+id/activeAlarmCheckBox"
+        android:id="@+id/activeCheckBox_AlarmRow"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginBottom="0dp"
@@ -43,7 +43,7 @@
             tools:layout_editor_absoluteY="8dp">
 
             <TextView
-                android:id="@+id/timeTextView"
+                android:id="@+id/timeTextView_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="8dp"
@@ -54,7 +54,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/stationTextView"
+                android:id="@+id/stationTextView_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -64,7 +64,7 @@
                 android:textSize="20sp" />
 
             <ImageView
-                android:id="@+id/deleteImageView"
+                android:id="@+id/deleteImageView_AlarmRow"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:tintMode="multiply"
@@ -85,7 +85,7 @@
             tools:layout_editor_absoluteY="8dp">
 
             <TextView
-                android:id="@+id/monActiveTextView"
+                android:id="@+id/mon_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -95,7 +95,7 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/tueActiveTextView"
+                android:id="@+id/tue_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -105,7 +105,7 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/wedActiveTextView"
+                android:id="@+id/wed_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -115,7 +115,7 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/thuActiveTextView"
+                android:id="@+id/thu_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -125,7 +125,7 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/friActiveTextView"
+                android:id="@+id/fri_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -135,7 +135,7 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/satActiveTextView"
+                android:id="@+id/sat_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -145,7 +145,7 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/sunActiveTextView"
+                android:id="@+id/sun_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

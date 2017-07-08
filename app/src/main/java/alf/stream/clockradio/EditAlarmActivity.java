@@ -93,25 +93,12 @@ public class EditAlarmActivity extends AppCompatActivity {
         ArrayAdapter<CharSequence> stationAdapter = ArrayAdapter.createFromResource(context, R.array.radio_stations, android.R.layout.simple_spinner_item);
         stationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stationSpinner.setAdapter(stationAdapter);
+        stationSpinner.setOnItemSelectedListener(stationSelectedListener);
 
         regionSpinner = (Spinner) findViewById(R.id.regionSpinner_EditAlarm);
-        ArrayAdapter<CharSequence> regionalAdapter = ArrayAdapter.createFromResource(context, R.array.p4_array, android.R.layout.simple_spinner_item);
-        regionalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        regionSpinner.setAdapter(regionalAdapter);
-
-        stationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String selection = getResources().getStringArray(R.array.streams)[i];
-                if(selection.equals(getString(R.string.P4_selection)))
-                    regionSpinner.setVisibility(Spinner.VISIBLE);
-                else
-                    regionSpinner.setVisibility(Spinner.INVISIBLE);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
+        ArrayAdapter<CharSequence> regionAdapter = ArrayAdapter.createFromResource(context, R.array.region_names, android.R.layout.simple_spinner_item);
+        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        regionSpinner.setAdapter(regionAdapter);
 
         if(alarm != null) {
             stationSpinner.setSelection(alarm.get_station());
@@ -178,7 +165,7 @@ public class EditAlarmActivity extends AppCompatActivity {
     }
 
     private Alarm createAlarm(){
-        return new Alarm( alarm == null ? -1 : alarm.get_id(),
+        return new Alarm( alarm == null ? -1 : alarm.get_id(), alarm == null || alarm.is_active(),
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? timePicker.getHour(): timePicker.getCurrentHour(),
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? timePicker.getMinute(): timePicker.getCurrentMinute(),
                 monTextView.isChecked(), tueTextView.isChecked(), wedTextView.isChecked(),
@@ -187,4 +174,18 @@ public class EditAlarmActivity extends AppCompatActivity {
                 volumeBar.getProgress()
         );
     }
+
+    private AdapterView.OnItemSelectedListener stationSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            String selection = getResources().getStringArray(R.array.station_links)[i];
+            if(selection.equals(getString(R.string.P4_selection)))
+                regionSpinner.setVisibility(Spinner.VISIBLE);
+            else
+                regionSpinner.setVisibility(Spinner.INVISIBLE);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> adapterView) {}
+    };
 }

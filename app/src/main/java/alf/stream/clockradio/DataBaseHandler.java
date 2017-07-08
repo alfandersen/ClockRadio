@@ -17,6 +17,7 @@ public class DataBaseHandler extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "alarms.db";
     public static final String TABLE_ALARMS = "alarms";
     public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_ACTIVE = "_active";
     public static final String COLUMN_HOUR = "_hour";
     public static final String COLUMN_MINUTE = "_minute";
     public static final String COLUMN_MON = "_mon";
@@ -38,6 +39,7 @@ public class DataBaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TABLE_ALARMS + " ( " +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_ACTIVE + " INTEGER DEFAULT 1, " +
                 COLUMN_HOUR + " INTEGER NOT NULL, " +
                 COLUMN_MINUTE + " INTEGER NOT NULL, " +
                 COLUMN_MON + " INTEGER DEFAULT 1, " +
@@ -99,6 +101,7 @@ public class DataBaseHandler extends SQLiteOpenHelper {
     private ContentValues getValues(Alarm alarm){
         ContentValues values = new ContentValues();
         values.put(COLUMN_HOUR, alarm.get_hour());
+        values.put(COLUMN_ACTIVE, alarm.is_active() ? 1 : 0);
         values.put(COLUMN_MINUTE, alarm.get_minute());
         values.put(COLUMN_MON, alarm.get_mon() ? 1 : 0);
         values.put(COLUMN_TUE, alarm.get_tue() ? 1 : 0);
@@ -116,6 +119,7 @@ public class DataBaseHandler extends SQLiteOpenHelper {
     private Alarm alarmFromCursor(Cursor c) {
         return new Alarm(
                 c.getInt(c.getColumnIndex(COLUMN_ID)),
+                c.getInt(c.getColumnIndex(COLUMN_ACTIVE)) == 1,
                 c.getInt(c.getColumnIndex(COLUMN_HOUR)),
                 c.getInt(c.getColumnIndex(COLUMN_MINUTE)),
                 c.getInt(c.getColumnIndex(COLUMN_MON)) == 1,

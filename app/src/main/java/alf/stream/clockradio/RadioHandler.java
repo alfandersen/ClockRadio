@@ -30,6 +30,8 @@ public class RadioHandler {
         }
     };
 
+    // TODO: implement region and put saved instance strings in string.xml
+
     public RadioHandler(Context c){
         context = c;
         intent = new Intent(context, RadioService.class);

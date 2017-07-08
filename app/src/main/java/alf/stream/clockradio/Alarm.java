@@ -6,6 +6,7 @@ package alf.stream.clockradio;
 
 public class Alarm {
     private int _id;
+    private boolean _active;
     private int _hour;
     private int _minute;
     private boolean _mon, _tue, _wed, _thu, _fri, _sat, _sun;
@@ -16,8 +17,9 @@ public class Alarm {
 
     // Constructor
 
-    public Alarm(int _id, int _hour, int _minute, boolean _mon, boolean _tue, boolean _wed, boolean _thu, boolean _fri, boolean _sat, boolean _sun, int _station, int _region, int _volume) {
+    public Alarm(int _id, boolean _active, int _hour, int _minute, boolean _mon, boolean _tue, boolean _wed, boolean _thu, boolean _fri, boolean _sat, boolean _sun, int _station, int _region, int _volume) {
         this._id = _id;
+        this._active = _active;
         this._hour = _hour;
         this._minute = _minute;
         this._mon = _mon;
@@ -37,6 +39,10 @@ public class Alarm {
 
     public int get_id() {
         return _id;
+    }
+
+    public boolean is_active() {
+        return _active;
     }
 
     public int get_hour() {

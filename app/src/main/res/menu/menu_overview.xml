@@ -5,7 +5,7 @@
     tools:context="alf.stream.clockradio.OverviewActivity">
 
     <item
-        android:id="@+id/action_add_alarm"
+        android:id="@+id/addAlarm_Overview"
         android:icon="@android:drawable/ic_menu_add"
         android:iconTint="@color/on"
         android:iconTintMode="add"
