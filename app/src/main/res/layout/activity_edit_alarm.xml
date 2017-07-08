@@ -8,7 +8,7 @@
     tools:context="alf.stream.clockradio.EditAlarmActivity">
 
     <TimePicker
-        android:id="@+id/timePicker2"
+        android:id="@+id/timePicker_EditAlarm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteX="0dp"
@@ -27,7 +27,7 @@
         tools:layout_editor_absoluteY="8dp">
 
         <CheckedTextView
-            android:id="@+id/monCheckedTextView"
+            android:id="@+id/monCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -38,7 +38,7 @@
             android:textSize="16sp" />
 
         <CheckedTextView
-            android:id="@+id/tueCheckedTextView"
+            android:id="@+id/tueCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -49,7 +49,7 @@
             android:textSize="16sp" />
 
         <CheckedTextView
-            android:id="@+id/wedCheckedTextView"
+            android:id="@+id/wedCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -60,7 +60,7 @@
             android:textSize="16sp" />
 
         <CheckedTextView
-            android:id="@+id/thuCheckedTextView"
+            android:id="@+id/thuCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -71,7 +71,7 @@
             android:textSize="16sp" />
 
         <CheckedTextView
-            android:id="@+id/friCheckedTextView"
+            android:id="@+id/friCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -82,7 +82,7 @@
             android:textSize="16sp" />
 
         <CheckedTextView
-            android:id="@+id/satCheckedTextView"
+            android:id="@+id/satCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -93,7 +93,7 @@
             android:textSize="16sp" />
 
         <CheckedTextView
-            android:id="@+id/sunCheckedTextView"
+            android:id="@+id/sunCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -111,7 +111,7 @@
         android:orientation="horizontal">
 
         <Spinner
-            android:id="@+id/stationSpinner"
+            android:id="@+id/stationSpinner_EditAlarm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -120,7 +120,7 @@
             app:layout_constraintTop_toBottomOf="@+id/alarmToggle" />
 
         <Spinner
-            android:id="@+id/regionSpinner"
+            android:id="@+id/regionSpinner_EditAlarm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -137,14 +137,14 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/volumeTextView"
+            android:id="@+id/volumeTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Volume:"
             android:textSize="16sp" />
 
         <SeekBar
-            android:id="@+id/volumeSeekBar"
+            android:id="@+id/volumeSeekBar_EditAlarm"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
@@ -158,14 +158,14 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/okButton"
+            android:id="@+id/okButton_EditAlarm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="OK" />
 
         <Button
-            android:id="@+id/cancelButton"
+            android:id="@+id/cancelButton_EditAlarm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

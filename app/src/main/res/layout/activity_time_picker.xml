@@ -8,7 +8,6 @@
     tools:context="alf.stream.clockradio.TimePickerActivity">
 
     <TimePicker
-        android:id="@+id/timePicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="visible" />
