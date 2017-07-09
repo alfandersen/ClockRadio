@@ -61,9 +61,9 @@
             android:id="@+id/playButton_Overview"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             android:visibility="visible"
-            app:srcCompat="@android:drawable/ic_media_play" />
+            app:srcCompat="@drawable/ic_play_rounded_circled" />
 
         <Spinner
             android:id="@+id/stationSpinner_Overview"

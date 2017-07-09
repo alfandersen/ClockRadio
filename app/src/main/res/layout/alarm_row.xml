@@ -7,10 +7,10 @@
     android:layout_height="wrap_content"
     android:background="@color/colorPrimaryDark"
     android:orientation="horizontal"
-    android:paddingBottom="16dp"
+    android:paddingBottom="8dp"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
-    android:paddingTop="16dp">
+    android:paddingTop="8dp">
 
     <CheckBox
         android:id="@+id/activeCheckBox_AlarmRow"
@@ -30,6 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="0dp"
+        android:layout_marginRight="4dp"
         android:layout_marginTop="0dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -52,8 +53,7 @@
                 android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/stationTextView_AlarmRow"
@@ -64,20 +64,21 @@
                 android:textAlignment="center"
                 android:textAllCaps="false"
                 android:textColor="@color/colorPrimary"
-                android:textSize="20sp" />
+                android:textSize="24sp" />
 
             <ImageView
                 android:id="@+id/deleteImageView_AlarmRow"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:padding="3dp"
                 android:tintMode="multiply"
-                app:srcCompat="@drawable/ic_menu_delete" />
+                app:srcCompat="@drawable/ic_cross_circled" />
 
         </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="4dp"
+            android:layout_height="8dp"
             android:layout_weight="1" />
 
         <LinearLayout
@@ -91,69 +92,106 @@
                 android:id="@+id/mon_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0"
+                android:paddingRight="3dp"
                 android:text="Mon"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textSize="12sp" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/tue_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0"
+                android:paddingRight="3dp"
                 android:text="Tue"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textSize="12sp" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/wed_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0"
+                android:paddingRight="3dp"
                 android:text="Wed"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textSize="12sp" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/thu_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0"
+                android:paddingRight="3dp"
                 android:text="Thu"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textSize="12sp" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/fri_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0"
+                android:paddingRight="3dp"
                 android:text="Fri"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textSize="12sp" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/sat_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0"
+                android:paddingRight="3dp"
                 android:text="Sat"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textSize="12sp" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/sun_AlarmRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0"
+                android:paddingRight="3dp"
                 android:text="Sun"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textSize="12sp" />
 

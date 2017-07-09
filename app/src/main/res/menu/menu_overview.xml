@@ -6,9 +6,12 @@
 
     <item
         android:id="@+id/addAlarm_Overview"
-        android:icon="@android:drawable/ic_menu_add"
-        android:iconTint="@color/on"
-        android:iconTintMode="add"
+        android:icon="@drawable/ic_plus_circled"
         android:title="Add Alarm"
         app:showAsAction="always" />
+    <item
+    android:id="@+id/info_Overview"
+    android:icon="@drawable/ic_info_circled"
+    android:title="Info"
+    app:showAsAction="always" />
 </menu>
