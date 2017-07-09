@@ -7,6 +7,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 public class EditAlarmActivity extends AppCompatActivity {
@@ -141,6 +143,11 @@ public class EditAlarmActivity extends AppCompatActivity {
             stationSpinner.setSelection(alarm.get_station());
 //            regionSpinner.setSelection(alarm.get_region());
         }
+        else {
+            stationSpinner.setSelection(PreferenceManager
+                    .getDefaultSharedPreferences(context)
+                    .getInt(context.getString(R.string.saved_station_int), -1));
+        }
     }
 
     private void setupVolumeBar() {
@@ -218,6 +225,7 @@ public class EditAlarmActivity extends AppCompatActivity {
     private AdapterView.OnItemSelectedListener stationSelectedListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+            ((TextView) stationSpinner.getChildAt(0)).setTextColor(ContextCompat.getColor(context,R.color.white));
             // TODO: Distinct region spinner
 //            String selection = getResources().getStringArray(R.array.station_links)[i];
 //            if(selection.startsWith("P4"))
