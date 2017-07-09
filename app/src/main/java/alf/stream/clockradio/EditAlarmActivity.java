@@ -20,6 +20,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import static alf.stream.clockradio.R.color.on;
+
 public class EditAlarmActivity extends AppCompatActivity {
 
     private static final String TAG = "EditAlarmActivity";
@@ -118,7 +120,7 @@ public class EditAlarmActivity extends AppCompatActivity {
 
     private void updateDayTextView(CheckedTextView tv){
         if(tv.isChecked()) {
-            tv.setTextColor(ContextCompat.getColor(context, R.color.on));
+            tv.setTextColor(ContextCompat.getColor(context, on));
             tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
         }
         else {
@@ -152,7 +154,7 @@ public class EditAlarmActivity extends AppCompatActivity {
 
     private void setupVolumeBar() {
         volumeBar = (SeekBar) findViewById(R.id.volumeSeekBar_EditAlarm);
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         volumeBar.setMax(am.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         new Thread(new Runnable() {
             @Override
@@ -170,8 +172,17 @@ public class EditAlarmActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if(mediaPlayer != null)
+                if(mediaPlayer != null) {
+                    final int temp = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+                    am.setStreamVolume(AudioManager.STREAM_MUSIC, volumeBar.getProgress(), 0);
                     mediaPlayer.start();
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mediaPlayer) {
+                            am.setStreamVolume(AudioManager.STREAM_MUSIC, temp, 0);
+                        }
+                    });
+                }
             }
         });
 
