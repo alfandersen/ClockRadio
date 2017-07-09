@@ -2,10 +2,12 @@ package alf.stream.clockradio;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,6 +20,7 @@ import android.widget.TimePicker;
 
 public class EditAlarmActivity extends AppCompatActivity {
 
+    private static final String TAG = "EditAlarmActivity";
     private Alarm alarm;
 
     private DataBaseHandler dataBaseHandler;
@@ -77,6 +80,13 @@ public class EditAlarmActivity extends AppCompatActivity {
         friTextView = (CheckedTextView) findViewById(R.id.friCheckedTextView_EditAlarm);
         satTextView = (CheckedTextView) findViewById(R.id.satCheckedTextView_EditAlarm);
         sunTextView = (CheckedTextView) findViewById(R.id.sunCheckedTextView_EditAlarm);
+        monTextView.setOnClickListener(dayClickListener);
+        tueTextView.setOnClickListener(dayClickListener);
+        wedTextView.setOnClickListener(dayClickListener);
+        thuTextView.setOnClickListener(dayClickListener);
+        friTextView.setOnClickListener(dayClickListener);
+        satTextView.setOnClickListener(dayClickListener);
+        sunTextView.setOnClickListener(dayClickListener);
         if(alarm != null){
             monTextView.setChecked(alarm.get_mon());
             tueTextView.setChecked(alarm.get_tue());
@@ -85,6 +95,33 @@ public class EditAlarmActivity extends AppCompatActivity {
             friTextView.setChecked(alarm.get_fri());
             satTextView.setChecked(alarm.get_sat());
             sunTextView.setChecked(alarm.get_sun());
+        }
+        updateDayTextView(monTextView);
+        updateDayTextView(tueTextView);
+        updateDayTextView(wedTextView);
+        updateDayTextView(thuTextView);
+        updateDayTextView(friTextView);
+        updateDayTextView(satTextView);
+        updateDayTextView(sunTextView);
+    }
+
+    private View.OnClickListener dayClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            CheckedTextView tv = (CheckedTextView) view;
+            tv.setChecked(!tv.isChecked()); // Toggle checked
+            updateDayTextView(tv);
+        }
+    };
+
+    private void updateDayTextView(CheckedTextView tv){
+        if(tv.isChecked()) {
+            tv.setTextColor(ContextCompat.getColor(context, R.color.on));
+            tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
+        }
+        else {
+            tv.setTextColor(ContextCompat.getColor(context, R.color.off_bright));
+            tv.setTypeface(tv.getTypeface(), Typeface.NORMAL);
         }
     }
 

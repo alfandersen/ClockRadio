@@ -6,7 +6,7 @@
     <color name="colorAccent">#80cbc4</color>
     <color name="off_bright">@color/colorPrimary</color>
     <color name="off_dark">@color/colorPrimaryDark</color>
-    <color name="on">@color/colorAccent</color>
+    <color name="on">#a1fff6</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
 </resources>

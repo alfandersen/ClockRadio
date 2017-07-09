@@ -2,6 +2,7 @@ package alf.stream.clockradio;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +12,6 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import java.util.Locale;
-
-import static alf.stream.clockradio.R.color.on;
 
 /**
  * Created by Alf on 7/8/2017.
@@ -91,7 +90,10 @@ class AlarmListAdapter extends CursorAdapter {
     }
 
     private void setDayActive(Context context, View v, int id, boolean active){
-        ((TextView) v.findViewById(id)).setTextColor(
-                ContextCompat.getColor(context, active ? on : R.color.off_bright));
+        if(active) {
+            TextView tv = (TextView) v.findViewById(id);
+            tv.setTextColor(ContextCompat.getColor(context, R.color.on));
+            tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
+        }
     }
 }

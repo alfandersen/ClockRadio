@@ -168,7 +168,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 loadingAnimation.setVisibility(ProgressBar.GONE);
                 playButton.setVisibility(ImageButton.VISIBLE);
-                playButton.setImageDrawable(getDrawable(R.drawable.ic_media_stop));
+                playButton.setImageDrawable(getDrawable(R.drawable.ic_stop_circled));
                 setStationSpinnerTextColor(R.color.on);
             }
         };
@@ -181,7 +181,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 loadingAnimation.setVisibility(ProgressBar.GONE);
                 playButton.setVisibility(ImageButton.VISIBLE);
-                playButton.setImageDrawable(getDrawable(R.drawable.ic_media_play));
+                playButton.setImageDrawable(getDrawable(R.drawable.ic_play_circled));
                 setStationSpinnerTextColor(R.color.white);
             }
         };
