@@ -43,7 +43,7 @@ public class EditAlarmActivity extends AppCompatActivity {
 
         // Get alarm if it exists in the database
         dataBaseHandler = new DataBaseHandler(context, DataBaseHandler.DATABASE_NAME, null, DataBaseHandler.DATABASE_VERSION);
-        int alarmId = intent.getIntExtra(getString(R.string.alarm_id), -1);
+        int alarmId = intent.getIntExtra(getString(R.string.alarm_id_int), -1);
         alarm = dataBaseHandler.getAlarm(alarmId);
 
         // Setup UI Elements
@@ -90,19 +90,19 @@ public class EditAlarmActivity extends AppCompatActivity {
 
     private void setupStationSpinners() {
         stationSpinner = (Spinner) findViewById(R.id.stationSpinner_EditAlarm);
-        ArrayAdapter<CharSequence> stationAdapter = ArrayAdapter.createFromResource(context, R.array.radio_stations, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> stationAdapter = ArrayAdapter.createFromResource(context, R.array.station_names, android.R.layout.simple_spinner_item);
         stationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stationSpinner.setAdapter(stationAdapter);
         stationSpinner.setOnItemSelectedListener(stationSelectedListener);
 
-        regionSpinner = (Spinner) findViewById(R.id.regionSpinner_EditAlarm);
-        ArrayAdapter<CharSequence> regionAdapter = ArrayAdapter.createFromResource(context, R.array.region_names, android.R.layout.simple_spinner_item);
-        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        regionSpinner.setAdapter(regionAdapter);
+//        regionSpinner = (Spinner) findViewById(R.id.regionSpinner_EditAlarm);
+//        ArrayAdapter<CharSequence> regionAdapter = ArrayAdapter.createFromResource(context, R.array.region_names, android.R.layout.simple_spinner_item);
+//        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        regionSpinner.setAdapter(regionAdapter);
 
         if(alarm != null) {
             stationSpinner.setSelection(alarm.get_station());
-            regionSpinner.setSelection(alarm.get_region());
+//            regionSpinner.setSelection(alarm.get_region());
         }
     }
 
@@ -115,7 +115,7 @@ public class EditAlarmActivity extends AppCompatActivity {
             public void run() {
                 mediaPlayer = MediaPlayer.create(context, R.raw.volume_change);
             }
-        });
+        }).start();
 
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -126,7 +126,8 @@ public class EditAlarmActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mediaPlayer.start();
+                if(mediaPlayer != null)
+                    mediaPlayer.start();
             }
         });
 
@@ -165,12 +166,14 @@ public class EditAlarmActivity extends AppCompatActivity {
     }
 
     private Alarm createAlarm(){
-        return new Alarm( alarm == null ? -1 : alarm.get_id(), alarm == null || alarm.is_active(),
+        return new Alarm(
+                alarm == null ? -1 : alarm.get_id(),
+                alarm == null || alarm.is_active(),
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? timePicker.getHour(): timePicker.getCurrentHour(),
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? timePicker.getMinute(): timePicker.getCurrentMinute(),
                 monTextView.isChecked(), tueTextView.isChecked(), wedTextView.isChecked(),
                 thuTextView.isChecked(), friTextView.isChecked(), satTextView.isChecked(), sunTextView.isChecked(),
-                stationSpinner.getSelectedItemPosition(), regionSpinner.getSelectedItemPosition(),
+                stationSpinner.getSelectedItemPosition(), //TODO: Remember to change when I make distinct region spinner (should probably get from database)
                 volumeBar.getProgress()
         );
     }
@@ -178,11 +181,12 @@ public class EditAlarmActivity extends AppCompatActivity {
     private AdapterView.OnItemSelectedListener stationSelectedListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-            String selection = getResources().getStringArray(R.array.station_links)[i];
-            if(selection.equals(getString(R.string.P4_selection)))
-                regionSpinner.setVisibility(Spinner.VISIBLE);
-            else
-                regionSpinner.setVisibility(Spinner.INVISIBLE);
+            // TODO: Distinct region spinner
+//            String selection = getResources().getStringArray(R.array.station_links)[i];
+//            if(selection.startsWith("P4"))
+//                regionSpinner.setVisibility(Spinner.VISIBLE);
+//            else
+//                regionSpinner.setVisibility(Spinner.INVISIBLE);
         }
 
         @Override

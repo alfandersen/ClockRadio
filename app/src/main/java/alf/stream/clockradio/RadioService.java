@@ -78,6 +78,8 @@ public class RadioService extends Service {
 
     private void stopPlayer(){
         if(player != null && player.isPlaying()) {
+            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
+            lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_stopped_filter)));
             player.stop();
         }
     }

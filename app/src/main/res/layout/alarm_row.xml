@@ -5,19 +5,20 @@
     android:id="@+id/layout_AlarmRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
     android:background="@color/colorPrimaryDark"
     android:orientation="horizontal"
-    android:padding="4dp">
+    android:paddingBottom="16dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="16dp">
 
     <CheckBox
         android:id="@+id/activeCheckBox_AlarmRow"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginBottom="0dp"
-        android:layout_marginLeft="0dp"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="0dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -50,6 +51,7 @@
                 android:text="08:00"
                 android:textAlignment="textStart"
                 android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -61,6 +63,7 @@
                 android:text="P6 Beat"
                 android:textAlignment="center"
                 android:textAllCaps="false"
+                android:textColor="@color/colorPrimary"
                 android:textSize="20sp" />
 
             <ImageView

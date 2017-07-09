@@ -7,17 +7,24 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 /**
  * Created by Alf on 7/5/2017.
  */
 
 public class RadioHandler {
-    private int currentStation;
-    private String[] stationUrls;
-    private String currentStationUrl;
-    private Intent intent;
+
+    private final String TAG = "RadioHandler";
     private Context context;
+    private Intent intent;
+
+    private int currentStation;
+    private String[] stationLinks;
+//    private int currentRegion;
+//    private String[] regionUrls;
+    private String currentStationUrl;
+
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -37,20 +44,22 @@ public class RadioHandler {
         intent = new Intent(context, RadioService.class);
         context.bindService(intent, serviceConnection, 0);
 
-        stationUrls = context.getResources().getStringArray(R.array.streams);
+        stationLinks = context.getResources().getStringArray(R.array.station_links);
         currentStation = PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getInt(context.getString(R.string.saved_station_int), 0);
-        if(currentStation < 0 || currentStation >= stationUrls.length)
+                .getInt(context.getString(R.string.saved_station_int), -1);
+
+        Log.e(TAG,"currentStation = "+currentStation);
+
+        if(currentStation < 0 || currentStation >= stationLinks.length)
             currentStation = 0;
 
         updateCurrentStationUrl();
     }
 
     private void updateCurrentStationUrl(){
-        currentStationUrl = stationUrls[currentStation];
+        currentStationUrl = stationLinks[currentStation];
         intent.putExtra(context.getString(R.string.station_path_string),currentStationUrl);
-        saveStation();
     }
 
     public int getCurrentStation() {
@@ -58,15 +67,17 @@ public class RadioHandler {
     }
 
     public void setStation(int newStation) {
-        if(newStation != currentStation && newStation >= 0 && newStation < stationUrls.length) {
+        if(newStation != currentStation && newStation >= 0 && newStation < stationLinks.length) {
             currentStation = newStation;
             updateCurrentStationUrl();
+            saveStation();
             if(isPlaying())
                 startPlayBack();
         }
     }
 
     public void saveStation() {
+        Log.e(TAG,"Saving station.");
         SharedPreferences.Editor editor = PreferenceManager.
                 getDefaultSharedPreferences(context).
                 edit();

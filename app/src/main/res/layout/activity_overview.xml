@@ -13,6 +13,9 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
+        android:divider="@color/colorPrimaryDark"
+        android:dividerHeight="2dp"
+        android:clickable="true"
         app:layout_constraintBottom_toTopOf="@+id/imageView"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -22,13 +25,16 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="344dp"
+        android:layout_width="0dp"
         android:layout_height="2dp"
         android:scaleType="fitXY"
         app:layout_constraintBottom_toTopOf="@+id/stationLayout"
         app:srcCompat="@android:drawable/bottom_bar"
-        tools:layout_editor_absoluteX="8dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <LinearLayout
         android:id="@+id/stationLayout"
@@ -73,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_weight="1"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/alarmToggle" />

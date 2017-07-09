@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 /**
@@ -15,22 +14,25 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("Alarm is going off!!!", "ARHHH WAKEUPPPPPPP!!!");
-        Intent radioIntent = new Intent(context, RadioService.class);
+        Log.e("Alarm is going off!!!", "ARHHH WAKE UPPPPPPP!!!");
 
-        String[] stationUrls = context.getResources().getStringArray(R.array.streams);
-        int currentStation = PreferenceManager
-                .getDefaultSharedPreferences(context)
-                .getInt(context.getString(R.string.saved_station_int), 0);
+        int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int), -1);
+        DataBaseHandler dbHandler = new DataBaseHandler(context,DataBaseHandler.DATABASE_NAME,null,DataBaseHandler.DATABASE_VERSION);
+        Alarm alarm = dbHandler.getAlarm(alarmId);
 
-        radioIntent.putExtra(context.getString(R.string.station_path_string),stationUrls[currentStation]);
+        // Should be redundant, but for good measure check if the alarm is suppose to sound.
+        if(alarm != null && alarm.is_active()) {
+            int station = alarm.get_station();
+            String[] stationUrls = context.getResources().getStringArray(R.array.station_links);
+            Intent radioIntent = new Intent(context, RadioService.class);
+            radioIntent.putExtra(context.getString(R.string.station_path_string), stationUrls[station]);
+            context.startService(radioIntent);
 
+            PackageManager pm = context.getPackageManager();
+            Intent launchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
+            context.startActivity(launchIntent);
 
-        PackageManager pm = context.getPackageManager();
-        Intent launchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
-        context.startActivity(launchIntent);
-
-        context.startService(radioIntent);
+            alarm.resetAlarm(context);
+        }
     }
-
 }
