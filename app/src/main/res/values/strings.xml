@@ -55,5 +55,8 @@
 
     <!--Saved Variables-->
     <string name="saved_station_int">saved_station_int</string>
+    <string name="alarm_active_filter">alarm_active_filter</string>
+    <string name="alarm_active_boolean">alarm_active_boolean</string>
+    <string name="alarm_delete_filter">alarm_delete_filter</string>
 
 </resources>

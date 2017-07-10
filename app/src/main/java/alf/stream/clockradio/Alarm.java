@@ -4,8 +4,11 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+import android.util.SparseBooleanArray;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 import static android.content.Context.ALARM_SERVICE;
 
@@ -14,11 +17,13 @@ import static android.content.Context.ALARM_SERVICE;
  */
 
 public class Alarm {
+    private static final String TAG = "Alarm";
     private int _id;
     private boolean _active;
     private int _hour;
     private int _minute;
-    private boolean _mon, _tue, _wed, _thu, _fri, _sat, _sun;
+    private SparseBooleanArray activeDays;
+//    private boolean _mon, _tue, _wed, _thu, _fri, _sat, _sun;
     private int _station;
     private int _volume;
 
@@ -30,13 +35,21 @@ public class Alarm {
         this._active = _active;
         this._hour = _hour;
         this._minute = _minute;
-        this._mon = _mon;
-        this._tue = _tue;
-        this._wed = _wed;
-        this._thu = _thu;
-        this._fri = _fri;
-        this._sat = _sat;
-        this._sun = _sun;
+        activeDays = new SparseBooleanArray();
+        activeDays.append(Calendar.MONDAY,_mon);
+        activeDays.append(Calendar.TUESDAY,_tue);
+        activeDays.append(Calendar.WEDNESDAY,_wed);
+        activeDays.append(Calendar.THURSDAY,_thu);
+        activeDays.append(Calendar.FRIDAY,_fri);
+        activeDays.append(Calendar.SATURDAY,_sat);
+        activeDays.append(Calendar.SUNDAY,_sun);
+//        this._mon = _mon;
+//        this._tue = _tue;
+//        this._wed = _wed;
+//        this._thu = _thu;
+//        this._fri = _fri;
+//        this._sat = _sat;
+//        this._sun = _sun;
         this._station = _station;
         this._volume = _volume;
     }
@@ -61,31 +74,31 @@ public class Alarm {
     }
 
     public boolean get_mon() {
-        return _mon;
+        return activeDays.get(Calendar.MONDAY);
     }
 
     public boolean get_tue() {
-        return _tue;
+        return activeDays.get(Calendar.TUESDAY);
     }
 
     public boolean get_wed() {
-        return _wed;
+        return activeDays.get(Calendar.WEDNESDAY);
     }
 
     public boolean get_thu() {
-        return _thu;
+        return activeDays.get(Calendar.THURSDAY);
     }
 
     public boolean get_fri() {
-        return _fri;
+        return activeDays.get(Calendar.FRIDAY);
     }
 
     public boolean get_sat() {
-        return _sat;
+        return activeDays.get(Calendar.SATURDAY);
     }
 
     public boolean get_sun() {
-        return _sun;
+        return activeDays.get(Calendar.SUNDAY);
     }
 
     public int get_station() {
@@ -96,9 +109,37 @@ public class Alarm {
         return _volume;
     }
 
+    // Setters
+
+    public void set_id(int _id) {
+        this._id = _id;
+    }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "_id=" + _id +
+                ", _active=" + _active +
+                ", _hour=" + _hour +
+                ", _minute=" + _minute +
+                ", _mon=" + get_mon() +
+                ", _tue=" + get_tue() +
+                ", _wed=" + get_wed() +
+                ", _thu=" + get_thu() +
+                ", _fri=" + get_fri() +
+                ", _sat=" + get_sat() +
+                ", _sun=" + get_sun() +
+                ", _station=" + _station +
+                ", _volume=" + _volume +
+                '}';
+    }
+
+
+    // Alarm Handling
+
     // If no days are checked, treat it as a one time event.
     public void resetAlarm(Context context) {
-        if(_mon || _tue || _wed || _thu || _fri || _sat ||_sun){
+        if(get_mon() || get_tue() || get_wed() || get_thu() || get_fri() || get_sat() ||get_sun()){
             setAlarm(context);
         }
         else{
@@ -116,95 +157,125 @@ public class Alarm {
 
         Calendar now = Calendar.getInstance();
 
-        // make sure that alarmTime is in the future
-        while(alarmTime.compareTo(now) <= 0){
+        int activeInDays = activeInDays(now, 0);
+        Log.e(TAG,"Active in " +activeInDays+" days!");
+        if((activeInDays == 0 || activeInDays == -1) && now.after(alarmTime)){
             alarmTime.add(Calendar.DAY_OF_YEAR,1);
         }
-
-        // TODO: This should not be so many lines of code
-        switch(now.get(Calendar.DAY_OF_WEEK)){
-            case Calendar.MONDAY:
-                if(_mon) ;
-                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-                break;
-
-            case Calendar.TUESDAY:
-                if(_tue) ;
-                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-                break;
-
-            case Calendar.WEDNESDAY:
-                if(_wed) ;
-                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-                break;
-
-            case Calendar.THURSDAY:
-                if(_thu) ;
-                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-                break;
-
-            case Calendar.FRIDAY:
-                if(_fri) ;
-                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-                break;
-
-
-            case Calendar.SATURDAY:
-                if(_sat) ;
-                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-                break;
-
-
-            case Calendar.SUNDAY:
-                if(_sun) ;
-                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-                break;
+        else if(!((activeInDays == 0 || activeInDays == -1) && now.before(alarmTime))){
+            activeInDays = activeInDays(now, 1);
+            alarmTime.add(Calendar.DAY_OF_YEAR, activeInDays);
         }
+
+//        // make sure that alarmTime is in the future
+//        while(alarmTime.compareTo(now) <= 0){
+//            alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//        }
+//
+//        // TODO: This should not be so many lines of code
+//        switch(now.get(Calendar.DAY_OF_WEEK)){
+//            case Calendar.MONDAY:
+//                if(_mon) ;
+//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,2);
+//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,3);
+//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,4);
+//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,5);
+//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,6);
+//                break;
+//
+//            case Calendar.TUESDAY:
+//                if(_tue) ;
+//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,2);
+//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,3);
+//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,4);
+//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,5);
+//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,6);
+//                break;
+//
+//            case Calendar.WEDNESDAY:
+//                if(_wed) ;
+//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,2);
+//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,3);
+//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,4);
+//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,5);
+//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,6);
+//                break;
+//
+//            case Calendar.THURSDAY:
+//                if(_thu) ;
+//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,2);
+//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,3);
+//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,4);
+//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,5);
+//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,6);
+//                break;
+//
+//            case Calendar.FRIDAY:
+//                if(_fri) ;
+//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,2);
+//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,3);
+//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,4);
+//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,5);
+//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,6);
+//                break;
+//
+//
+//            case Calendar.SATURDAY:
+//                if(_sat) ;
+//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,2);
+//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,3);
+//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,4);
+//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,5);
+//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,6);
+//                break;
+//
+//
+//            case Calendar.SUNDAY:
+//                if(_sun) ;
+//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,2);
+//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,3);
+//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,4);
+//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,5);
+//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,6);
+//                break;
+//        }
+//
 
         Intent alarmIntent = new Intent(context, AlarmReceiver.class);
         alarmIntent.putExtra(context.getString(R.string.alarm_id_int),_id);
         AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent);
+        Log.i(TAG,"Set alarm "+_id+". Will sound " + String.format("%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime));
+    }
+
+    private int activeInDays(Calendar now, int after){
+        for(int i = after; i < 7; i++){
+            int day = (now.get(Calendar.DAY_OF_WEEK)+i)%7;
+            if(activeDays.get(day))
+                return i;
+        }
+        return -1;
+    }
+
+    private String calendarString(Calendar c){
+        return String.format(Locale.getDefault(),"%02d:%02d - %d / %d",
+                c.get(Calendar.HOUR_OF_DAY),
+                c.get(Calendar.MINUTE),
+                c.get(Calendar.DAY_OF_YEAR),
+                c.get(Calendar.YEAR));
     }
 
     public void cancelAlarm(Context context){
         _active = false;
+        Log.i(TAG,"Canceled alarm " + _id);
         Intent alarmIntent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);

@@ -25,6 +25,9 @@ import static alf.stream.clockradio.R.color.on;
 public class EditAlarmActivity extends AppCompatActivity {
 
     private static final String TAG = "EditAlarmActivity";
+    private static final int CREATING = 0;
+    private static final int EDITING = 1;
+    private int mode;
     private Alarm alarm;
 
     private DataBaseHandler dataBaseHandler;
@@ -52,7 +55,8 @@ public class EditAlarmActivity extends AppCompatActivity {
         dataBaseHandler = new DataBaseHandler(context, DataBaseHandler.DATABASE_NAME, null, DataBaseHandler.DATABASE_VERSION);
         int alarmId = intent.getIntExtra(getString(R.string.alarm_id_int), -1);
         alarm = dataBaseHandler.getAlarm(alarmId);
-
+        mode = alarm == null ? CREATING : EDITING;
+        
         // Setup UI Elements
         setupTimePicker();
         setupWeekDayCheckers();
@@ -65,7 +69,7 @@ public class EditAlarmActivity extends AppCompatActivity {
     private void setupTimePicker(){
         timePicker = (TimePicker) findViewById(R.id.timePicker_EditAlarm);
         timePicker.setIs24HourView(true);
-        if(alarm != null) {
+        if(mode == EDITING) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 timePicker.setHour(alarm.get_hour());
                 timePicker.setMinute(alarm.get_minute());
@@ -91,7 +95,7 @@ public class EditAlarmActivity extends AppCompatActivity {
         friTextView.setOnClickListener(dayClickListener);
         satTextView.setOnClickListener(dayClickListener);
         sunTextView.setOnClickListener(dayClickListener);
-        if(alarm != null){
+        if(mode == EDITING){
             monTextView.setChecked(alarm.get_mon());
             tueTextView.setChecked(alarm.get_tue());
             wedTextView.setChecked(alarm.get_wed());
@@ -141,7 +145,7 @@ public class EditAlarmActivity extends AppCompatActivity {
 //        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 //        regionSpinner.setAdapter(regionAdapter);
 
-        if(alarm != null) {
+        if(mode == EDITING) {
             stationSpinner.setSelection(alarm.get_station());
 //            regionSpinner.setSelection(alarm.get_region());
         }
@@ -186,7 +190,7 @@ public class EditAlarmActivity extends AppCompatActivity {
             }
         });
 
-        if(alarm != null){
+        if(mode == EDITING){
             volumeBar.setProgress(alarm.get_volume());
         }
         else
@@ -198,10 +202,14 @@ public class EditAlarmActivity extends AppCompatActivity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(alarm == null)
-                    dataBaseHandler.addAlarm(createAlarm());
+                alarm = createAlarm();
+                if(mode == CREATING)
+                    alarm.set_id((int)dataBaseHandler.addAlarm(alarm));
                 else
-                    dataBaseHandler.updateAlarm(createAlarm());
+                    dataBaseHandler.updateAlarm(alarm);
+
+                if(alarm.get_id() != -1)
+                    alarm.setAlarm(context);
 
                 Intent overviewIntent = new Intent(context,OverviewActivity.class);
                 context.startActivity(overviewIntent);

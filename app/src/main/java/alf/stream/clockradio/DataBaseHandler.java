@@ -5,8 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import java.util.ArrayList;
+import android.util.Log;
+import android.util.SparseArray;
 
 
 /**
@@ -14,6 +14,7 @@ import java.util.ArrayList;
  */
 // TODO: getWritable and getReadable in seperate thread...?? Depends on speed - It's a very small database.
 public class DataBaseHandler extends SQLiteOpenHelper {
+    private static final String TAG = "DataBaseHandler";
     Context context;
     public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "alarms.db";
@@ -41,6 +42,20 @@ public class DataBaseHandler extends SQLiteOpenHelper {
         db.execSQL(AlarmTable.SQL_DROP_TABLE);
         db.execSQL(StationTable.SQL_DROP_TABLE);
         onCreate(db);
+    }
+
+    public void updateTableField(String tableName, int id, String column, boolean b) {
+        ContentValues cv = new ContentValues();
+        cv.put(column,b);
+        getWritableDatabase().update(tableName,cv,"_id="+id,null);
+    }
+
+    public void updateTableField(String tableName, int id, String column, String s) {
+
+    }
+
+    public void updateTableField(String tableName, int id, String column, int i) {
+
     }
 
     /******************************
@@ -133,8 +148,9 @@ public class DataBaseHandler extends SQLiteOpenHelper {
 
     }
 
-    public void addAlarm(Alarm alarm){
-        getWritableDatabase().insert(AlarmTable.TABLE_NAME, null, getAlarmValues(alarm));
+    public long addAlarm(Alarm alarm){
+        return getWritableDatabase().insert(AlarmTable.TABLE_NAME, null, getAlarmValues(alarm));
+
     }
 
     public void updateAlarm(Alarm alarm){
@@ -157,19 +173,18 @@ public class DataBaseHandler extends SQLiteOpenHelper {
         return null;
     }
 
-//    public List<Alarm> getAllAlarms(){
-//        ArrayList<Alarm> alarms = new ArrayList<>();
-//        Cursor c = getReadableDatabase().rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + ";", null);
-//        c.moveToFirst();
-//        while (!c.isAfterLast()){
-//            alarms.add(alarmFromCursor(c));
-//            c.moveToNext();
-//        }
-//        return alarms;
-//    }
+    public SparseArray<Alarm> getAllAlarms(){
+        SparseArray<Alarm> alarms = new SparseArray<>();
+        Cursor c = getReadableDatabase().rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + ";", null);
+        c.moveToFirst();
+        while (!c.isAfterLast()){
+            alarms.append(c.getInt(c.getColumnIndex(AlarmTable.COLUMN_ID)),alarmFromCursor(c));
+            c.moveToNext();
+        }
+        return alarms;
+    }
 
     public Cursor getAlarmsCursor() {
-        ArrayList<Alarm> alarms = new ArrayList<>();
         return getReadableDatabase().rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + ";", null);
     }
 

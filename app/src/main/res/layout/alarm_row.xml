@@ -71,7 +71,8 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:padding="3dp"
-                android:tintMode="multiply"
+                android:scaleType="centerInside"
+                android:visibility="visible"
                 app:srcCompat="@drawable/ic_cross_circled" />
 
         </LinearLayout>

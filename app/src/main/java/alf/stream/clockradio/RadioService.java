@@ -16,11 +16,15 @@ import android.util.Log;
 
 public class RadioService extends Service {
     private static MediaPlayer player;
-    private String station;
+    private static String station;
     private Context context;
 
     public static boolean isPlaying(){
         return player != null && player.isPlaying();
+    }
+
+    public static String getStation() {
+        return station;
     }
 
     @Override

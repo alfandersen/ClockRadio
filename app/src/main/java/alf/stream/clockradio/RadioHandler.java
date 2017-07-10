@@ -45,10 +45,14 @@ public class RadioHandler {
         context.bindService(intent, serviceConnection, 0);
 
         stationLinks = context.getResources().getStringArray(R.array.station_links);
-        currentStation = PreferenceManager
-                .getDefaultSharedPreferences(context)
-                .getInt(context.getString(R.string.saved_station_int), -1);
-
+        if(isPlaying()){
+            updateCurrentStation();
+        }
+        else {
+            currentStation = PreferenceManager
+                    .getDefaultSharedPreferences(context)
+                    .getInt(context.getString(R.string.saved_station_int), -1);
+        }
         Log.e(TAG,"currentStation = "+currentStation);
 
         if(currentStation < 0 || currentStation >= stationLinks.length)
@@ -57,12 +61,24 @@ public class RadioHandler {
         updateCurrentStationUrl();
     }
 
+    private void updateCurrentStation(){
+        String stationLink = RadioService.getStation();
+        for(int i = 0; i < stationLinks.length; i++){
+            if(stationLinks[i].equals(stationLink)) {
+                currentStation = i;
+                break;
+            }
+        }
+    }
+
     private void updateCurrentStationUrl(){
         currentStationUrl = stationLinks[currentStation];
         intent.putExtra(context.getString(R.string.station_path_string),currentStationUrl);
     }
 
     public int getCurrentStation() {
+        if(isPlaying())
+            updateCurrentStation();
         return currentStation;
     }
 

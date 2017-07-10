@@ -122,7 +122,6 @@
 //
 //        // Volume Seek Bar
 //        volumeSeekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
-//        final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 //        volumeSeekBar.setMax(audioManager
 //                .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
 //

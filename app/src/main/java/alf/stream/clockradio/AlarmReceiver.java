@@ -12,13 +12,15 @@ import android.util.Log;
 
 public class AlarmReceiver extends BroadcastReceiver {
 
+    private static final String TAG = "AlarmReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("Alarm is going off!!!", "ARHHH WAKE UPPPPPPP!!!");
 
         int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int), -1);
         DataBaseHandler dbHandler = new DataBaseHandler(context,DataBaseHandler.DATABASE_NAME,null,DataBaseHandler.DATABASE_VERSION);
         Alarm alarm = dbHandler.getAlarm(alarmId);
+        Log.e(TAG, "Start "+alarm);
 
         // Should be redundant, but for good measure check if the alarm is suppose to sound.
         if(alarm != null && alarm.is_active()) {

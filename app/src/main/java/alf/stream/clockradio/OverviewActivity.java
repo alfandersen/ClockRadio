@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,12 +28,15 @@ public class OverviewActivity extends AppCompatActivity {
     private Context context;
     private DataBaseHandler dataBaseHandler;
     private RadioHandler radioHandler;
+    private SparseArray<Alarm> alarms;
 
     // Broadcast Receivers
     private LocalBroadcastManager localBroadcastManager;
     private BroadcastReceiver loadingReceiver;
     private BroadcastReceiver playStartedReceiver;
     private BroadcastReceiver playStoppedReceiver;
+    private BroadcastReceiver alarmActiveReceiver;
+    private BroadcastReceiver alarmDeleteReceiver;
 
     // UI Elements
     private MenuItem addAlarm;
@@ -50,6 +53,7 @@ public class OverviewActivity extends AppCompatActivity {
 
         dataBaseHandler = new DataBaseHandler(context,DataBaseHandler.DATABASE_NAME,null,DataBaseHandler.DATABASE_VERSION);
         radioHandler = new RadioHandler(context);
+        alarms = dataBaseHandler.getAllAlarms();
 
         // Setup UI Elements
         setupListView();
@@ -62,6 +66,8 @@ public class OverviewActivity extends AppCompatActivity {
         setupLoadingReceiver();
         setupPlayStartedReceiver();
         setupPlayStoppedReceiver();
+        setupAlarmActiveReceiver();
+        setupAlarmDeleteReceiver();
     }
 
     @Override
@@ -71,6 +77,7 @@ public class OverviewActivity extends AppCompatActivity {
         localBroadcastManager.unregisterReceiver(loadingReceiver);
         localBroadcastManager.unregisterReceiver(playStartedReceiver);
         localBroadcastManager.unregisterReceiver(playStoppedReceiver);
+        localBroadcastManager.unregisterReceiver(alarmActiveReceiver);
     }
 
     @Override
@@ -101,7 +108,6 @@ public class OverviewActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.e(TAG,"listView.Onclick() item " + i + " with id " + alarmListAdapter.getItemId(i));
                 Intent editIntent = new Intent(context, EditAlarmActivity.class);
                 editIntent.putExtra(context.getString(R.string.alarm_id_int),(int)alarmListAdapter.getItemId(i));
                 context.startActivity(editIntent);
@@ -117,6 +123,7 @@ public class OverviewActivity extends AppCompatActivity {
         stationSpinner.setSelection(radioHandler.getCurrentStation());
         stationSpinner.setOnItemSelectedListener(stationSelectedListener);
 
+
         //TODO: Distinct region spinner
 //        regionSpinner = (Spinner) findViewById(R.id.regionSpinner_Overview);
 //        ArrayAdapter<CharSequence> regionAdapter = ArrayAdapter.createFromResource(context, R.array.region_names, android.R.layout.simple_spinner_item);
@@ -128,6 +135,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void setupPlayButton() {
         playButton = (ImageButton) findViewById(R.id.playButton_Overview);
+        playButton.setImageDrawable(getDrawable(radioHandler.isPlaying() ? R.drawable.ic_stop_circled : R.drawable.ic_play_circled));
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -169,6 +177,10 @@ public class OverviewActivity extends AppCompatActivity {
                 loadingAnimation.setVisibility(ProgressBar.GONE);
                 playButton.setVisibility(ImageButton.VISIBLE);
                 playButton.setImageDrawable(getDrawable(R.drawable.ic_stop_circled));
+                int stationIndex = radioHandler.getCurrentStation();
+                if(stationSpinner.getSelectedItemPosition() != radioHandler.getCurrentStation()){
+                    stationSpinner.setSelection(stationIndex);
+                }
                 setStationSpinnerTextColor(R.color.on);
             }
         };
@@ -188,6 +200,42 @@ public class OverviewActivity extends AppCompatActivity {
         localBroadcastManager.registerReceiver(playStoppedReceiver, new IntentFilter(context.getString(R.string.play_stopped_filter)));
     }
 
+    private void setupAlarmActiveReceiver() {
+        alarmActiveReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int),-1);
+                boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_active_boolean),true);
+                Alarm alarm = alarms.get(alarmId);
+                if(alarm != null){
+                    dataBaseHandler.updateTableField(
+                            DataBaseHandler.AlarmTable.TABLE_NAME, alarmId,
+                            DataBaseHandler.AlarmTable.COLUMN_ACTIVE, active
+                    );
+                    if(active) alarm.setAlarm(context);
+                    else alarm.cancelAlarm(context);
+                }
+            }
+        };
+        localBroadcastManager.registerReceiver(alarmActiveReceiver, new IntentFilter(context.getString(R.string.alarm_active_filter)));
+    }
+
+    private void setupAlarmDeleteReceiver() {
+        alarmDeleteReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int),-1);
+                Alarm alarm = alarms.get(alarmId);
+                if(alarm != null){
+                    alarm.cancelAlarm(context);
+                    dataBaseHandler.deleteAlarm(alarm);
+                    setupListView();
+                    alarms.remove(alarmId);
+                }
+            }
+        };
+        localBroadcastManager.registerReceiver(alarmDeleteReceiver, new IntentFilter(context.getString(R.string.alarm_delete_filter)));
+    }
 
     /****************
      * AdapterViews *
