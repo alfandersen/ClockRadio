@@ -218,7 +218,7 @@ public class EditAlarmActivity extends AppCompatActivity {
                 else
                     databaseHelper.updateAlarm(alarm);
 
-                if(alarm.get_id() != -1)
+                if(alarm.get_id() != -1 && alarm.is_active())
                     alarm.setAlarm(context);
 
                 finish();
