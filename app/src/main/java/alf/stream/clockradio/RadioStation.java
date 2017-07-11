@@ -26,4 +26,9 @@ class RadioStation {
     public String get_link() {
         return _link;
     }
+
+    @Override
+    public String toString() {
+        return _name;
+    }
 }

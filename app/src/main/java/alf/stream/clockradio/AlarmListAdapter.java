@@ -32,8 +32,9 @@ class AlarmListAdapter extends CursorAdapter {
 
     public AlarmListAdapter(Context context, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
+//        Log.i(TAG, "Created "+this);
         this.context = context;
-        stationNames = context.getResources().getStringArray(R.array.station_names);
+//        stationNames = context.getResources().getStringArray(R.array.station_names);
     }
 
     @Override
@@ -44,26 +45,26 @@ class AlarmListAdapter extends CursorAdapter {
     @Override
     public void bindView(View alarmView, final Context context, final Cursor cursor) {
         // ID
-        final int alarmId = parseInt(cursor, DataBaseHandler.AlarmTable.COLUMN_ID);
+        final int alarmId = parseInt(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_ID);
 
         // Time
         TextView timeTextView = (TextView) alarmView.findViewById(R.id.timeTextView_AlarmRow);
-        int hour = parseInt(cursor, DataBaseHandler.AlarmTable.COLUMN_HOUR);
-        int minute = parseInt(cursor, DataBaseHandler.AlarmTable.COLUMN_MINUTE);
+        int hour = parseInt(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_HOUR);
+        int minute = parseInt(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_MINUTE);
         timeTextView.setText(String.format(Locale.getDefault(), "%02d:%02d", hour, minute));
 
         // Station Name
         TextView stationNameTextView = (TextView) alarmView.findViewById(R.id.stationTextView_AlarmRow);
-        int stationNo = parseInt(cursor, DataBaseHandler.AlarmTable.COLUMN_STATION);
-        stationNameTextView.setText(stationNames[stationNo]);
+//        int stationNo = parseInt(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_STATION);
+        String stationName = parseString(cursor, DatabaseManager.DatabaseHelper.StationTable.COLUMN_NAME);
+        stationNameTextView.setText(stationName);
 
         // Is Active
         CheckBox activationCheckBox = (CheckBox) alarmView.findViewById(R.id.activeCheckBox_AlarmRow);
-        activationCheckBox.setChecked(parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_ACTIVE));
+        activationCheckBox.setChecked(parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_ACTIVE));
         activationCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Log.e(TAG,"Checkbox "+alarmId);
                 LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
                 lbm.sendBroadcast(new Intent(context.getString(R.string.alarm_active_filter))
                         .putExtra(context.getString(R.string.alarm_id_int),alarmId)
@@ -73,13 +74,13 @@ class AlarmListAdapter extends CursorAdapter {
         checkBoxMap.put(activationCheckBox,alarmId);
 
         // Days
-        setDayActive(context, alarmView, R.id.mon_AlarmRow, parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_MON));
-        setDayActive(context, alarmView, R.id.tue_AlarmRow, parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_TUE));
-        setDayActive(context, alarmView, R.id.wed_AlarmRow, parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_WED));
-        setDayActive(context, alarmView, R.id.thu_AlarmRow, parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_THU));
-        setDayActive(context, alarmView, R.id.fri_AlarmRow, parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_FRI));
-        setDayActive(context, alarmView, R.id.sat_AlarmRow, parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_SAT));
-        setDayActive(context, alarmView, R.id.sun_AlarmRow, parseBoolean(cursor, DataBaseHandler.AlarmTable.COLUMN_SUN));
+        setDayActive(context, alarmView, R.id.mon_AlarmRow, parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_MON));
+        setDayActive(context, alarmView, R.id.tue_AlarmRow, parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_TUE));
+        setDayActive(context, alarmView, R.id.wed_AlarmRow, parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_WED));
+        setDayActive(context, alarmView, R.id.thu_AlarmRow, parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_THU));
+        setDayActive(context, alarmView, R.id.fri_AlarmRow, parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_FRI));
+        setDayActive(context, alarmView, R.id.sat_AlarmRow, parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_SAT));
+        setDayActive(context, alarmView, R.id.sun_AlarmRow, parseBoolean(cursor, DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_SUN));
 
         // TODO: Delete button
         ImageView deleteImage = (ImageView) alarmView.findViewById(R.id.deleteImageView_AlarmRow);
@@ -87,7 +88,7 @@ class AlarmListAdapter extends CursorAdapter {
         deleteImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.e(TAG,"delete alarm with id " + alarmId);
+                Log.i(TAG,"delete alarm with id " + alarmId + " from Adapter "+this);
                 LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
                 lbm.sendBroadcast(new Intent(context.getString(R.string.alarm_delete_filter))
                         .putExtra(context.getString(R.string.alarm_id_int),alarmId));
@@ -101,6 +102,10 @@ class AlarmListAdapter extends CursorAdapter {
 
     private int parseInt(Cursor cursor, String column) {
         return cursor.getInt(cursor.getColumnIndexOrThrow(column));
+    }
+
+    private String parseString(Cursor cursor, String column) {
+        return cursor.getString(cursor.getColumnIndexOrThrow(column));
     }
 
     private void setDayActive(Context context, View v, int id, boolean active){

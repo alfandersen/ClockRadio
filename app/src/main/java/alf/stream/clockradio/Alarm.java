@@ -52,6 +52,7 @@ public class Alarm {
 //        this._sun = _sun;
         this._station = _station;
         this._volume = _volume;
+//        Log.i(TAG,_id+" created with address "+this);
     }
 
 
@@ -115,24 +116,24 @@ public class Alarm {
         this._id = _id;
     }
 
-    @Override
-    public String toString() {
-        return "Alarm{" +
-                "_id=" + _id +
-                ", _active=" + _active +
-                ", _hour=" + _hour +
-                ", _minute=" + _minute +
-                ", _mon=" + get_mon() +
-                ", _tue=" + get_tue() +
-                ", _wed=" + get_wed() +
-                ", _thu=" + get_thu() +
-                ", _fri=" + get_fri() +
-                ", _sat=" + get_sat() +
-                ", _sun=" + get_sun() +
-                ", _station=" + _station +
-                ", _volume=" + _volume +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "Alarm{" +
+//                "_id=" + _id +
+//                ", _active=" + _active +
+//                ", _hour=" + _hour +
+//                ", _minute=" + _minute +
+//                ", _mon=" + get_mon() +
+//                ", _tue=" + get_tue() +
+//                ", _wed=" + get_wed() +
+//                ", _thu=" + get_thu() +
+//                ", _fri=" + get_fri() +
+//                ", _sat=" + get_sat() +
+//                ", _sun=" + get_sun() +
+//                ", _station=" + _station +
+//                ", _volume=" + _volume +
+//                '}';
+//    }
 
 
     // Alarm Handling
@@ -158,14 +159,26 @@ public class Alarm {
         Calendar now = Calendar.getInstance();
 
         int activeInDays = activeInDays(now, 0);
-        Log.e(TAG,"Active in " +activeInDays+" days!");
-        if((activeInDays == 0 || activeInDays == -1) && now.after(alarmTime)){
-            alarmTime.add(Calendar.DAY_OF_YEAR,1);
-        }
-        else if(!((activeInDays == 0 || activeInDays == -1) && now.before(alarmTime))){
-            activeInDays = activeInDays(now, 1);
-            alarmTime.add(Calendar.DAY_OF_YEAR, activeInDays);
-        }
+        int activeInDaysAfterToday = activeInDays(now, 1);
+
+        if(alarmTime.before(now))
+            alarmTime.add(Calendar.DAY_OF_YEAR,Math.abs(activeInDaysAfterToday));
+        else if(activeInDays > 0 && alarmTime.after(now))
+            alarmTime.add(Calendar.DAY_OF_YEAR,activeInDays);
+
+//        if(activeInDays == 0 && now.after(alarmTime))
+//            activeInDays = activeInDays(now,1);
+//
+//        if(activeInDays == -1 && now.after(alarmTime)){
+//            Log.d(TAG,"A: activeInDays="+activeInDays);
+//            alarmTime.add(Calendar.DAY_OF_YEAR,1);
+//        }
+//        else if(!((activeInDays == 0 || activeInDays == -1) && now.before(alarmTime))){
+//            Log.d(TAG,"B: activeInDays="+activeInDays);
+//            activeInDays = activeInDays(now, 1);
+//            Log.d(TAG,"C: activeInDays="+activeInDays);
+//            alarmTime.add(Calendar.DAY_OF_YEAR, activeInDays);
+//        }
 
 //        // make sure that alarmTime is in the future
 //        while(alarmTime.compareTo(now) <= 0){
@@ -253,11 +266,16 @@ public class Alarm {
         AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent);
-        Log.i(TAG,"Set alarm "+_id+". Will sound " + String.format("%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime));
+        String toastText = "Set alarm "+_id+" to play " + String.format("%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime);
+//        Toast toast = new Toast(context);
+//        toast.setText(toastText);
+//        toast.setDuration(Toast.LENGTH_LONG);
+//        toast.show();
+        Log.i(TAG,toastText);
     }
 
     private int activeInDays(Calendar now, int after){
-        for(int i = after; i < 7; i++){
+        for(int i = after; i <= 7; i++){
             int day = (now.get(Calendar.DAY_OF_WEEK)+i)%7;
             if(activeDays.get(day))
                 return i;
@@ -275,7 +293,7 @@ public class Alarm {
 
     public void cancelAlarm(Context context){
         _active = false;
-        Log.i(TAG,"Canceled alarm " + _id);
+        Log.i(TAG,"Canceled alarm " + _id + " with address "+this);
         Intent alarmIntent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);

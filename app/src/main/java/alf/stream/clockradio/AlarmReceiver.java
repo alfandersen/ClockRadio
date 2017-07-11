@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.util.Log;
 
 /**
@@ -18,16 +19,20 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int), -1);
-        DataBaseHandler dbHandler = new DataBaseHandler(context,DataBaseHandler.DATABASE_NAME,null,DataBaseHandler.DATABASE_VERSION);
-        Alarm alarm = dbHandler.getAlarm(alarmId);
-        Log.e(TAG, "Start "+alarm);
+        DatabaseManager.DatabaseHelper databaseHelper = DatabaseManager.DatabaseHelper.getInstance(context);
+        Alarm alarm = databaseHelper.getAlarm(alarmId);
 
         // Should be redundant, but for good measure check if the alarm is suppose to sound.
         if(alarm != null && alarm.is_active()) {
-            int station = alarm.get_station();
-            String[] stationUrls = context.getResources().getStringArray(R.array.station_links);
+            Log.i(TAG, "Start Alarm "+alarm.get_id());
+
+            AudioManager am = (AudioManager) context.getSystemService(context.AUDIO_SERVICE);
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, alarm.get_volume(), 0);
+
+            String stationLink = databaseHelper.getStationLink(alarm.get_station());
+
             Intent radioIntent = new Intent(context, RadioService.class);
-            radioIntent.putExtra(context.getString(R.string.station_path_string), stationUrls[station]);
+            radioIntent.putExtra(context.getString(R.string.station_path_string), stationLink);
             context.startService(radioIntent);
 
             PackageManager pm = context.getPackageManager();
@@ -35,6 +40,9 @@ public class AlarmReceiver extends BroadcastReceiver {
             context.startActivity(launchIntent);
 
             alarm.resetAlarm(context);
+        }
+        else{
+            Log.w(TAG, "Alarm "+alarmId+" not started because "+(alarm == null ? "alarm was not found in database." : "alarm is not active."));
         }
     }
 }

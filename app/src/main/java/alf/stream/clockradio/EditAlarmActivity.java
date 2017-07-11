@@ -12,12 +12,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
 import static alf.stream.clockradio.R.color.on;
@@ -30,7 +28,7 @@ public class EditAlarmActivity extends AppCompatActivity {
     private int mode;
     private Alarm alarm;
 
-    private DataBaseHandler dataBaseHandler;
+    private DatabaseManager.DatabaseHelper databaseHelper;
     private MediaPlayer mediaPlayer;
 
     private Context context;
@@ -46,17 +44,17 @@ public class EditAlarmActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_edit_alarm);
-
-        context = getApplicationContext();
+        context = this;
         intent = getIntent();
 
         // Get alarm if it exists in the database
-        dataBaseHandler = new DataBaseHandler(context, DataBaseHandler.DATABASE_NAME, null, DataBaseHandler.DATABASE_VERSION);
+        databaseHelper = DatabaseManager.DatabaseHelper.getInstance(context);
         int alarmId = intent.getIntExtra(getString(R.string.alarm_id_int), -1);
-        alarm = dataBaseHandler.getAlarm(alarmId);
+        alarm = databaseHelper.getAlarm(alarmId);
         mode = alarm == null ? CREATING : EDITING;
-        
+
         // Setup UI Elements
         setupTimePicker();
         setupWeekDayCheckers();
@@ -64,6 +62,16 @@ public class EditAlarmActivity extends AppCompatActivity {
         setupVolumeBar();
         setupOkButton();
         setupCancelButton();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     private void setupTimePicker(){
@@ -135,8 +143,10 @@ public class EditAlarmActivity extends AppCompatActivity {
 
     private void setupStationSpinners() {
         stationSpinner = (Spinner) findViewById(R.id.stationSpinner_EditAlarm);
-        ArrayAdapter<CharSequence> stationAdapter = ArrayAdapter.createFromResource(context, R.array.station_names, android.R.layout.simple_spinner_item);
-        stationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        ArrayAdapter<CharSequence> stationAdapter = ArrayAdapter.createFromResource(context, R.array.station_names, android.R.layout.simple_spinner_item);
+//        ArrayAdapter<RadioStation> stationAdapter = new ArrayAdapter<RadioStation>(context, R.layout.station_spinner_item, radioStations);
+        StationAdapter stationAdapter = OverviewActivity.getStationAdapter();
+//        stationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stationSpinner.setAdapter(stationAdapter);
         stationSpinner.setOnItemSelectedListener(stationSelectedListener);
 
@@ -146,7 +156,7 @@ public class EditAlarmActivity extends AppCompatActivity {
 //        regionSpinner.setAdapter(regionAdapter);
 
         if(mode == EDITING) {
-            stationSpinner.setSelection(alarm.get_station());
+            stationSpinner.setSelection(stationAdapter.getIdPosition(alarm.get_station()));
 //            regionSpinner.setSelection(alarm.get_region());
         }
         else {
@@ -204,15 +214,14 @@ public class EditAlarmActivity extends AppCompatActivity {
             public void onClick(View view) {
                 alarm = createAlarm();
                 if(mode == CREATING)
-                    alarm.set_id((int)dataBaseHandler.addAlarm(alarm));
+                    alarm.set_id((int) databaseHelper.addAlarm(alarm));
                 else
-                    dataBaseHandler.updateAlarm(alarm);
+                    databaseHelper.updateAlarm(alarm);
 
                 if(alarm.get_id() != -1)
                     alarm.setAlarm(context);
 
-                Intent overviewIntent = new Intent(context,OverviewActivity.class);
-                context.startActivity(overviewIntent);
+                finish();
             }
         });
     }
@@ -222,8 +231,7 @@ public class EditAlarmActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent overviewIntent = new Intent(context,OverviewActivity.class);
-                context.startActivity(overviewIntent);
+                finish();
             }
         });
     }
@@ -236,7 +244,7 @@ public class EditAlarmActivity extends AppCompatActivity {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? timePicker.getMinute(): timePicker.getCurrentMinute(),
                 monTextView.isChecked(), tueTextView.isChecked(), wedTextView.isChecked(),
                 thuTextView.isChecked(), friTextView.isChecked(), satTextView.isChecked(), sunTextView.isChecked(),
-                stationSpinner.getSelectedItemPosition(), //TODO: Remember to change when I make distinct region spinner (should probably get from database)
+                (int)((RadioStation)stationSpinner.getSelectedItem()).get_id(), //TODO: Remember to change when I make distinct region spinner (should probably get from database)
                 volumeBar.getProgress()
         );
     }
@@ -244,7 +252,9 @@ public class EditAlarmActivity extends AppCompatActivity {
     private AdapterView.OnItemSelectedListener stationSelectedListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-            ((TextView) stationSpinner.getChildAt(0)).setTextColor(ContextCompat.getColor(context,R.color.white));
+//            if(stationSpinner != null && adapterView.equals(stationSpinner) && stationSpinner.getChildCount() > 0) {
+//                ((TextView) stationSpinner.getChildAt(0)).setTextColor(ContextCompat.getColor(context, R.color.white));
+//            }
             // TODO: Distinct region spinner
 //            String selection = getResources().getStringArray(R.array.station_links)[i];
 //            if(selection.startsWith("P4"))

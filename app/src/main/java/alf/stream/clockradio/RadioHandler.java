@@ -7,7 +7,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 /**
  * Created by Alf on 7/5/2017.
@@ -20,10 +19,10 @@ public class RadioHandler {
     private Intent intent;
 
     private int currentStation;
-    private String[] stationLinks;
+//    private String[] stationLinks;
 //    private int currentRegion;
 //    private String[] regionUrls;
-    private String currentStationUrl;
+//    private String currentStationUrl;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -40,11 +39,12 @@ public class RadioHandler {
     // TODO: implement region and put saved instance strings in string.xml
 
     public RadioHandler(Context c){
+//        Log.i(TAG, "Created "+this);
         context = c;
         intent = new Intent(context, RadioService.class);
         context.bindService(intent, serviceConnection, 0);
 
-        stationLinks = context.getResources().getStringArray(R.array.station_links);
+//        stationLinks = context.getResources().getStringArray(R.array.station_links);
         if(isPlaying()){
             updateCurrentStation();
         }
@@ -53,28 +53,27 @@ public class RadioHandler {
                     .getDefaultSharedPreferences(context)
                     .getInt(context.getString(R.string.saved_station_int), -1);
         }
-        Log.e(TAG,"currentStation = "+currentStation);
 
-        if(currentStation < 0 || currentStation >= stationLinks.length)
+        if(currentStation < 0 || currentStation >= OverviewActivity.getRadioStations().size())
             currentStation = 0;
 
-        updateCurrentStationUrl();
+//        updateCurrentStationUrl();
     }
 
     private void updateCurrentStation(){
-        String stationLink = RadioService.getStation();
-        for(int i = 0; i < stationLinks.length; i++){
-            if(stationLinks[i].equals(stationLink)) {
+        String stationLink = RadioService.getStationUrl();
+        for(int i = 0; i < OverviewActivity.getRadioStations().size(); i++){
+            if(OverviewActivity.getRadioStations().get(i).get_link().equals(stationLink)) {
                 currentStation = i;
                 break;
             }
         }
     }
 
-    private void updateCurrentStationUrl(){
-        currentStationUrl = stationLinks[currentStation];
-        intent.putExtra(context.getString(R.string.station_path_string),currentStationUrl);
-    }
+//    private void updateCurrentStationUrl(){
+//        currentStationUrl = stationLinks[currentStation];
+//        intent.putExtra(context.getString(R.string.station_path_string),currentStationUrl);
+//    }
 
     public int getCurrentStation() {
         if(isPlaying())
@@ -83,9 +82,9 @@ public class RadioHandler {
     }
 
     public void setStation(int newStation) {
-        if(newStation != currentStation && newStation >= 0 && newStation < stationLinks.length) {
+        if(newStation != currentStation && newStation >= 0 && newStation < OverviewActivity.getRadioStations().size()) {
             currentStation = newStation;
-            updateCurrentStationUrl();
+//            updateCurrentStationUrl();
             saveStation();
             if(isPlaying())
                 startPlayBack();
@@ -93,7 +92,6 @@ public class RadioHandler {
     }
 
     public void saveStation() {
-        Log.e(TAG,"Saving station.");
         SharedPreferences.Editor editor = PreferenceManager.
                 getDefaultSharedPreferences(context).
                 edit();
@@ -102,6 +100,7 @@ public class RadioHandler {
     }
 
     public void startPlayBack() {
+        intent.putExtra(context.getString(R.string.station_path_string),OverviewActivity.getRadioStations().get(currentStation).get_link());
         context.startService(intent);
     }
 
