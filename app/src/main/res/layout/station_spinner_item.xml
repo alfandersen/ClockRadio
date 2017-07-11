@@ -7,9 +7,12 @@
     <TextView
         android:id="@+id/statioSpinnerTextView"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_gravity="center"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
         android:text="P6 Beat"
         android:textAllCaps="false"
-        android:textColor="@color/off_bright" />
+        android:textColor="@color/white"
+        android:textSize="18sp" />
 </LinearLayout>
