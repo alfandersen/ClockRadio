@@ -47,16 +47,19 @@
     <string name="play_started_filter">play_started_filter</string>
     <string name="play_stopped_filter">play_stopped_filter</string>
     <string name="loading_station_filter">loading_station_filter</string>
+    <string name="alarm_active_filter">alarm_active_filter</string>
+    <string name="alarm_delete_filter">alarm_delete_filter</string>
+    <string name="alarm_set_filter">alarm_set_filter</string>
 
     <!--Intent Data-->
     <string name="loading_station_boolean">loading_station_boolean</string>
     <string name="station_path_string">station_path_string</string>
     <string name="alarm_id_int">alarm_id</string>
+    <string name="alarm_active_boolean">alarm_active_boolean</string>
+    <string name="alarm_time_string">alarm_time_string</string>
+    <string name="station_id_int">atation_id_int</string>
 
     <!--Saved Variables-->
     <string name="saved_station_int">saved_station_int</string>
-    <string name="alarm_active_filter">alarm_active_filter</string>
-    <string name="alarm_active_boolean">alarm_active_boolean</string>
-    <string name="alarm_delete_filter">alarm_delete_filter</string>
 
 </resources>

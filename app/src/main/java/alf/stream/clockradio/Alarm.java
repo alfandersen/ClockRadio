@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 
@@ -257,12 +258,15 @@ public class Alarm {
         AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent);
-        String toastText = "Set alarm "+_id+" to play " + String.format("%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime);
-//        Toast toast = new Toast(context);
-//        toast.setText(toastText);
-//        toast.setDuration(Toast.LENGTH_LONG);
-//        toast.show();
-        Log.i(TAG,toastText);
+
+        LocalBroadcastManager.getInstance(context).sendBroadcast(
+                new Intent(context.getString(R.string.alarm_set_filter))
+                        .putExtra(context.getString(R.string.station_id_int),_station)
+                        .putExtra(context.getString(R.string.alarm_active_boolean),true)
+                        .putExtra(context.getString(R.string.alarm_time_string),String.format(Locale.getDefault(),"%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime))
+        );
+
+        Log.i(TAG,"Set alarm "+_id+" to play " + String.format(Locale.getDefault(),"%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime));
     }
 
     public int activeInDays(Calendar now, int after){
@@ -292,5 +296,11 @@ public class Alarm {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
+
+        LocalBroadcastManager.getInstance(context).sendBroadcast(
+                new Intent(context.getString(R.string.alarm_set_filter))
+                        .putExtra(context.getString(R.string.alarm_id_int),_id)
+                        .putExtra(context.getString(R.string.alarm_active_boolean),false)
+        );
     }
 }

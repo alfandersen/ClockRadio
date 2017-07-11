@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -39,6 +39,7 @@ public class OverviewActivity extends AppCompatActivity {
     private BroadcastReceiver playStoppedReceiver;
     private BroadcastReceiver alarmActiveReceiver;
     private BroadcastReceiver alarmDeleteReceiver;
+    private BroadcastReceiver alarmSetReceiver;
 
     // UI Elements
     private MenuItem addAlarm;
@@ -80,6 +81,7 @@ public class OverviewActivity extends AppCompatActivity {
         setupPlayStoppedReceiver();
         setupAlarmActiveReceiver();
         setupAlarmDeleteReceiver();
+        setupAlarmSetReceiver();
     }
 
     @Override
@@ -105,6 +107,8 @@ public class OverviewActivity extends AppCompatActivity {
         localBroadcastManager.unregisterReceiver(playStartedReceiver);
         localBroadcastManager.unregisterReceiver(playStoppedReceiver);
         localBroadcastManager.unregisterReceiver(alarmActiveReceiver);
+        localBroadcastManager.unregisterReceiver(alarmDeleteReceiver);
+        localBroadcastManager.unregisterReceiver(alarmSetReceiver);
         databaseHelper.close();
     }
 
@@ -252,7 +256,6 @@ public class OverviewActivity extends AppCompatActivity {
                 int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int),-1);
                 boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_active_boolean),true);
                 Alarm alarm = alarms.get(alarmId);
-                Log.d(TAG,"alarmActiveReceiver received id "+alarmId+" with boolean "+active+".\nFound "+alarm+"in SparseArray.");
                 if(alarm != null){
                     if(active) alarm.setAlarm(context);
                     else alarm.cancelAlarm(context);
@@ -282,6 +285,25 @@ public class OverviewActivity extends AppCompatActivity {
             }
         };
         localBroadcastManager.registerReceiver(alarmDeleteReceiver, new IntentFilter(context.getString(R.string.alarm_delete_filter)));
+    }
+
+    private void setupAlarmSetReceiver() {
+        alarmSetReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int stationId = intent.getIntExtra(context.getString(R.string.station_id_int),-1);
+                boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_active_boolean),false);
+                String timeText = intent.getStringExtra(context.getString(R.string.alarm_time_string));
+
+                if(active){
+                    Toast.makeText(context,stationAdapter.getObjectWithId(stationId).get_name()+" will play\n"+timeText,Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Toast.makeText(context,"Alarm canceled!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        localBroadcastManager.registerReceiver(alarmSetReceiver, new IntentFilter(context.getString(R.string.alarm_set_filter)));
     }
 
     /****************

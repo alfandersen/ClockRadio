@@ -33,6 +33,10 @@ public class StationAdapter extends ArrayAdapter<RadioStation> {
         return -1;
     }
 
+    public RadioStation getObjectWithId(int id){
+        return getItem(getIdPosition(id));
+    }
+
     @Override
     public boolean hasStableIds() {
         return true;
