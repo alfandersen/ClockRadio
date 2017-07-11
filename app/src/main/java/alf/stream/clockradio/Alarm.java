@@ -23,7 +23,6 @@ public class Alarm {
     private int _hour;
     private int _minute;
     private SparseBooleanArray activeDays;
-//    private boolean _mon, _tue, _wed, _thu, _fri, _sat, _sun;
     private int _station;
     private int _volume;
 
@@ -43,16 +42,8 @@ public class Alarm {
         activeDays.append(Calendar.FRIDAY,_fri);
         activeDays.append(Calendar.SATURDAY,_sat);
         activeDays.append(Calendar.SUNDAY,_sun);
-//        this._mon = _mon;
-//        this._tue = _tue;
-//        this._wed = _wed;
-//        this._thu = _thu;
-//        this._fri = _fri;
-//        this._sat = _sat;
-//        this._sun = _sun;
         this._station = _station;
         this._volume = _volume;
-//        Log.i(TAG,_id+" created with address "+this);
     }
 
 
@@ -274,11 +265,14 @@ public class Alarm {
         Log.i(TAG,toastText);
     }
 
-    private int activeInDays(Calendar now, int after){
+    public int activeInDays(Calendar now, int after){
+        Calendar nextDays = Calendar.getInstance();
+        nextDays.add(Calendar.DAY_OF_WEEK,after);
         for(int i = after; i <= 7; i++){
-            int day = (now.get(Calendar.DAY_OF_WEEK)+i)%7;
+            int day = nextDays.get(Calendar.DAY_OF_WEEK);
             if(activeDays.get(day))
                 return i;
+            nextDays.add(Calendar.DAY_OF_WEEK,1);
         }
         return -1;
     }
