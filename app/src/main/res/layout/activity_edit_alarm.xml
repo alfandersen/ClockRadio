@@ -5,18 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="alf.stream.clockradio.EditAlarmActivity">
+    tools:context="alf.stream.clockradio.EditAlarmActivity"
+    android:weightSum="1">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:layout_weight="0.1" />
 
     <TimePicker
         android:id="@+id/timePicker_EditAlarm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:timePickerMode="spinner"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp" />
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="16dp" />
+        android:layout_height="16dp"
+        android:layout_weight="0.1" />
 
     <LinearLayout
         android:layout_width="match_parent"
