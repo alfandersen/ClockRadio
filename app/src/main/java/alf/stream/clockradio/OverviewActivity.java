@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,7 +29,7 @@ public class OverviewActivity extends AppCompatActivity {
     private Context context;
     private DatabaseManager.DatabaseHelper databaseHelper;
     private RadioHandler radioHandler;
-    private SparseArray<Alarm> alarms;
+    private static SparseArray<Alarm> alarms;
     private static List<RadioStation> radioStations;
     private static StationAdapter stationAdapter;
 
@@ -37,9 +38,7 @@ public class OverviewActivity extends AppCompatActivity {
     private BroadcastReceiver loadingReceiver;
     private BroadcastReceiver playStartedReceiver;
     private BroadcastReceiver playStoppedReceiver;
-    private BroadcastReceiver alarmActiveReceiver;
-    private BroadcastReceiver alarmDeleteReceiver;
-    private BroadcastReceiver alarmSetReceiver;
+    private BroadcastReceiver databaseChangedReceiver;
 
     // UI Elements
     private MenuItem addAlarm;
@@ -57,9 +56,8 @@ public class OverviewActivity extends AppCompatActivity {
         context = this;
 
         databaseHelper = DatabaseManager.DatabaseHelper.getInstance(context);
-        databaseHelper.open();
+        databaseHelper.openDatabase();
 
-        alarms = databaseHelper.getAllAlarms();
         radioStations = databaseHelper.getRadioStations();
         if(radioStations.isEmpty()) {
             databaseHelper.populateStationTable(getResources().openRawResource(R.raw.radio_stations));
@@ -70,6 +68,7 @@ public class OverviewActivity extends AppCompatActivity {
         radioHandler = new RadioHandler(context);
 
         // Setup UI Elements
+        setupListView();
         setupStationSpinners();
         setupPlayButton();
         setupLoadingAnimation();
@@ -79,17 +78,13 @@ public class OverviewActivity extends AppCompatActivity {
         setupLoadingReceiver();
         setupPlayStartedReceiver();
         setupPlayStoppedReceiver();
-        setupAlarmActiveReceiver();
-        setupAlarmDeleteReceiver();
-        setupAlarmSetReceiver();
+        setupDatabaseChangedReceiver();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 //        Log.i(TAG, "onStart()");
-        setupListView();
-        alarms = databaseHelper.getAllAlarms();
     }
 
     @Override
@@ -106,10 +101,8 @@ public class OverviewActivity extends AppCompatActivity {
         localBroadcastManager.unregisterReceiver(loadingReceiver);
         localBroadcastManager.unregisterReceiver(playStartedReceiver);
         localBroadcastManager.unregisterReceiver(playStoppedReceiver);
-        localBroadcastManager.unregisterReceiver(alarmActiveReceiver);
-        localBroadcastManager.unregisterReceiver(alarmDeleteReceiver);
-        localBroadcastManager.unregisterReceiver(alarmSetReceiver);
-        databaseHelper.close();
+        localBroadcastManager.unregisterReceiver(databaseChangedReceiver);
+        databaseHelper.closeDatabase();
     }
 
     @Override
@@ -126,6 +119,10 @@ public class OverviewActivity extends AppCompatActivity {
 
     public static StationAdapter getStationAdapter() {
         return stationAdapter;
+    }
+
+    public static SparseArray<Alarm> getAlarms() {
+        return alarms;
     }
 
     public static int radioStationAdapterPos(int stationId){
@@ -151,6 +148,7 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void setupListView() {
+        alarms = databaseHelper.getAllAlarms();
         listView = (ListView) findViewById(R.id.listView_Overview);
         final AlarmListAdapter alarmListAdapter = new AlarmListAdapter(context, databaseHelper.getAlarmsCursor(), false);
         listView.setAdapter(alarmListAdapter);
@@ -211,7 +209,6 @@ public class OverviewActivity extends AppCompatActivity {
                 if(intent.getBooleanExtra(context.getString(R.string.loading_station_boolean),false)) {
                     playButton.setVisibility(ImageButton.GONE);
                     loadingAnimation.setVisibility(ProgressBar.VISIBLE);
-                    setSpinnerTextColor(stationSpinner, R.color.white);
                 }
             }
         };
@@ -230,7 +227,6 @@ public class OverviewActivity extends AppCompatActivity {
                     stationSpinner.setSelection(stationIndex);
                     radioHandler.setStation(stationIndex);
                 }
-                setSpinnerTextColor(stationSpinner, R.color.on);
             }
         };
         localBroadcastManager.registerReceiver(playStartedReceiver, new IntentFilter(context.getString(R.string.play_started_filter)));
@@ -243,104 +239,73 @@ public class OverviewActivity extends AppCompatActivity {
                 loadingAnimation.setVisibility(ProgressBar.GONE);
                 playButton.setVisibility(ImageButton.VISIBLE);
                 playButton.setImageDrawable(getDrawable(R.drawable.ic_play_circled));
-                setSpinnerTextColor(stationSpinner, R.color.white);
             }
         };
         localBroadcastManager.registerReceiver(playStoppedReceiver, new IntentFilter(context.getString(R.string.play_stopped_filter)));
     }
 
-    private void setupAlarmActiveReceiver() {
-        alarmActiveReceiver = new BroadcastReceiver() {
+    private void setupDatabaseChangedReceiver() {
+        databaseChangedReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                int flag = intent.getIntExtra(context.getString(R.string.alarm_changed_flag),-1);
                 int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int),-1);
-                boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_active_boolean),true);
-                Alarm alarm = alarms.get(alarmId);
-                if(alarm != null){
-                    if(active) alarm.setAlarm(context);
-                    else alarm.cancelAlarm(context);
+                boolean showToast = intent.getBooleanExtra(context.getString(R.string.show_toast_boolean),false);
 
-                    databaseHelper.updateTableField(
-                            DatabaseManager.DatabaseHelper.AlarmTable.TABLE_NAME, alarmId,
-                            DatabaseManager.DatabaseHelper.AlarmTable.COLUMN_ACTIVE, active
-                    );
-                }
-            }
-        };
-        localBroadcastManager.registerReceiver(alarmActiveReceiver, new IntentFilter(context.getString(R.string.alarm_active_filter)));
-    }
-
-    private void setupAlarmDeleteReceiver() {
-        alarmDeleteReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int),-1);
-                Alarm alarm = alarms.get(alarmId);
-                if(alarm != null){
-                    alarm.cancelAlarm(context);
-                    databaseHelper.deleteAlarm(alarm);
-                    alarms.remove(alarmId);
-                    setupListView();
-                }
-            }
-        };
-        localBroadcastManager.registerReceiver(alarmDeleteReceiver, new IntentFilter(context.getString(R.string.alarm_delete_filter)));
-    }
-
-    private void setupAlarmSetReceiver() {
-        alarmSetReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int stationId = intent.getIntExtra(context.getString(R.string.station_id_int),-1);
-                boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_active_boolean),false);
-                String timeText = intent.getStringExtra(context.getString(R.string.alarm_time_string));
-
-                if(active){
-                    Toast.makeText(context,stationAdapter.getObjectWithId(stationId).get_name()+" will play\n"+timeText,Toast.LENGTH_LONG).show();
-                }
+                if(flag == -1 || alarmId == -1) Log.e(TAG,"Database broadcast not recognized with flag = "+flag+" and id = "+alarmId);
                 else {
-                    Toast.makeText(context,"Alarm canceled!",Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Database broadcast with flag " + flag + ",  id " + alarmId + ",  showToast " + showToast);
+
+                    switch (flag) {
+                        case Alarm.FLAG_CREATE:
+                            setupListView();
+                            alarms.get(alarmId).setAlarm(context,false);
+                            Toast.makeText(context, "Alarm created. " + alarmSetToast(alarms.get(alarmId)), Toast.LENGTH_LONG).show();
+                            break;
+
+                        case Alarm.FLAG_ACTIVE_CHANGE:
+                            if (showToast) { // Assuming that reset do not show toasts and checkbox change does
+                                if (alarms.get(alarmId).is_active())
+                                    Toast.makeText(context, alarmSetToast(alarms.get(alarmId)), Toast.LENGTH_LONG).show();
+                                else
+                                    Toast.makeText(context, "Alarm canceled.", Toast.LENGTH_SHORT).show();
+                            } else
+                                setupListView();
+                            break;
+
+                        case Alarm.FLAG_UPDATE:
+                            setupListView();
+                            if(alarms.get(alarmId).is_active())
+                                alarms.get(alarmId).setAlarm(context,false);
+                            Toast.makeText(context, "Alarm updated. " + alarmSetToast(alarms.get(alarmId)), Toast.LENGTH_LONG).show();
+                            break;
+
+                        case Alarm.FLAG_DELETE:
+                            setupListView();
+                            Toast.makeText(context, "Alarm deleted.", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
                 }
             }
         };
-        localBroadcastManager.registerReceiver(alarmSetReceiver, new IntentFilter(context.getString(R.string.alarm_set_filter)));
+        localBroadcastManager.registerReceiver(databaseChangedReceiver, new IntentFilter(context.getString(R.string.database_changed_filter)));
+    }
+
+    String alarmSetToast(Alarm alarm){
+        return stationAdapter.getObjectWithId(alarm.get_station())+ " will play\n" +alarm.getAlarmTimeString();
     }
 
     /****************
      * AdapterViews *
      ****************/
 
-    private void setSpinnerTextColor(Spinner spinner, int colorId){
-//        if(spinner != null && spinner.getChildCount() > 0) {
-//            ((TextView) spinner.getChildAt(0)).setTextColor(ContextCompat.getColor(context, colorId));// FIXME: Attempt to invoke virtual method 'void android.widget.TextView.setTextColor(int)' on a null object reference
-//        }
-    }
 
     private AdapterView.OnItemSelectedListener stationSelectedListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
             if(adapterView.equals(stationSpinner)) {
                 radioHandler.setStation(i);
-                if(radioHandler.isPlaying())
-                    setSpinnerTextColor((Spinner)adapterView, R.color.on);
-                else
-                    setSpinnerTextColor((Spinner)adapterView, R.color.white);// FIXME: Attempt to invoke virtual method 'void android.widget.TextView.setTextColor(int)' on a null object reference
             }
-
-                // TODO: Distinct region spinner
-//            if(adapterView.equals(stationSpinner)) {
-//                String selection = getResources().getStringArray(R.array.streams)[i];
-//                if (selection.equals(getString(R.string.P4_selection))) {
-//                    regionSpinner.setVisibility(Spinner.VISIBLE);
-//                    radioHandler.setStation(regionSpinner.getSelectedItemPosition());
-//                } else {
-//                    regionSpinner.setVisibility(Spinner.INVISIBLE);
-//                    radioHandler.setStation(i);
-//                }
-//            }
-//            else if (adapterView.equals(regionSpinner)){
-//                radioHandler.setStation(i);
-//            }
         }
 
         @Override

@@ -1,10 +1,14 @@
 package alf.stream.clockradio;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -20,24 +24,68 @@ import java.util.List;
 /**
  * Created by Alf on 7/7/2017.
  */
-// TODO: getWritable and getReadable in seperate thread...?? Depends on speed - It's a very small database.
-public class DatabaseManager {
+class DatabaseManager {
 
-    public static class DatabaseHelper extends SQLiteOpenHelper {
+    static class DatabaseHelper extends SQLiteOpenHelper {
         private static DatabaseHelper instance = null;
         private static SQLiteDatabase db = null;
         private static final String TAG = "DatabaseHelper";
 //        private Context context;
         private static final int DATABASE_VERSION = 3;
         private static final String DATABASE_NAME = "alarms.db";
+        private static BroadcastReceiver broadcastReceiver;
 
         /*********************
          * Database Instance *
          *********************/
 
-        public static DatabaseHelper getInstance(Context context) {
+        static DatabaseHelper getInstance(Context context) {
             if (instance == null) {
                 instance = new DatabaseHelper(context.getApplicationContext());
+            }
+            if(broadcastReceiver == null) {
+                broadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        int flag = intent.getIntExtra(context.getString(R.string.alarm_changed_flag),-1);
+                        if(flag == -1) Log.e(TAG,"Alarm changed broadcast without a flag!!");
+                        else Log.d(TAG,"Alarm changed broadcast with flag "+flag);
+
+                        int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int),-1);
+                        boolean changed = false;
+                        switch(flag) {
+                            case Alarm.FLAG_CREATE:
+                                alarmId = addAlarmFromBroadcast(context,intent);
+                                changed = true;
+                                break;
+
+                            case Alarm.FLAG_ACTIVE_CHANGE:
+                                boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_active_boolean), true);
+                                updateAlarmActive(alarmId, active);
+                                changed = true;
+                                break;
+
+                            case Alarm.FLAG_UPDATE:
+                                updateAlarmFromBroadcast(context, intent, alarmId);
+                                changed = true;
+                                break;
+
+                            case Alarm.FLAG_DELETE:
+                                deleteAlarm(alarmId);
+                                changed = true;
+                                break;
+                        }
+                        if(changed) {
+                            boolean showToast = intent.getBooleanExtra(context.getString(R.string.show_toast_boolean), false);
+                            LocalBroadcastManager.getInstance(context)
+                                    .sendBroadcast(new Intent(context.getString(R.string.database_changed_filter))
+                                            .putExtra(context.getString(R.string.alarm_id_int), alarmId)
+                                            .putExtra(context.getString(R.string.alarm_changed_flag), flag)
+                                            .putExtra(context.getString(R.string.show_toast_boolean),showToast));
+                        }
+                    }
+                };
+                LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, new IntentFilter(context.getString(R.string.alarm_changed_filter)));
             }
             return instance;
         }
@@ -47,14 +95,14 @@ public class DatabaseManager {
 //            this.context = context;
         }
 
-        public void open(){
+        void openDatabase(){
             if(db == null || !db.isOpen()){
                 db = getWritableDatabase();
                 Log.d(TAG, "Opened");
             }
         }
 
-        public void close(){
+        void closeDatabase(){
             if(db != null && db.isOpen()){
                 db.close();
                 Log.d(TAG, "Closed");
@@ -87,87 +135,34 @@ public class DatabaseManager {
             onCreate(db);
         }
 
-        /***********************
-         * Convenience methods *
-         ***********************/
-
-        public void updateTableField(String tableName, int id, String column, boolean value) {
-            ContentValues cv = new ContentValues();
-            cv.put(column, value);
-            update(tableName,cv,"_id=" + id);
-        }
-
-        public void updateTableField(String tableName, int id, String column, String value) {
-            ContentValues cv = new ContentValues();
-            cv.put(column, value);
-            update(tableName,cv,"_id=" + id);
-        }
-
-        public void updateTableField(String tableName, int id, String column, int value) {
-            ContentValues cv = new ContentValues();
-            cv.put(column, value);
-            update(tableName,cv,"_id=" + id);
-        }
-
-        private long insert(String table, ContentValues cv){
-            boolean singleQuery = (db == null || !db.isOpen());
-            if(singleQuery) open();
-            long ret = db.insert(table, null, cv);
-            if(singleQuery) close();
-            return ret;
-        }
-
-        private int update(String table, ContentValues cv, String whereClause){
-            boolean singleQuery = (db == null || !db.isOpen());
-            if(singleQuery) open();
-            int ret = db.update(table, cv, whereClause, null);
-            if(singleQuery) close();
-            return ret;
-        }
-
-        private void execSQL(String sql){
-            boolean singleQuery = (db == null || !db.isOpen());
-            if(singleQuery) open();
-            db.execSQL(sql);
-            if(singleQuery) close();
-        }
-
-        private Cursor rawQuery(String sql){
-            boolean singleQuery = (db == null || !db.isOpen());
-            if(singleQuery) open();
-            Cursor c = db.rawQuery(sql, null);
-            if(singleQuery) close();
-            return c;
-        }
 
         /******************************
          * STATION TABLE AND HANDLERS *
          ******************************/
-        public final class StationTable {
-            public static final String TABLE_NAME = "stations";
+        final static class StationTable {
+            static final String TABLE_NAME = "stations";
 
-            public static final String COLUMN_ID = "_id";
-            public static final String COLUMN_NAME = "_name";
-            public static final String COLUMN_LINK = "_link";
+            static final String COLUMN_ID = "_id";
+            static final String COLUMN_NAME = "_name";
+            static final String COLUMN_LINK = "_link";
 
-            public static final String SQL_CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ( " +
+            static final String SQL_CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ( " +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_NAME + " TEXT NOT NULL, " +
                     COLUMN_LINK + " TEXT NOT NULL " +
                     ");";
 
-            public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
+            static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
         }
 
-        public void populateStationTable(InputStream inputStreamCSV) {
+        void populateStationTable(InputStream inputStreamCSV) {
             BufferedReader br = new BufferedReader(
                     new InputStreamReader(inputStreamCSV, Charset.forName("UTF-8"))
             );
 
             String row = "";
             ContentValues contentValues = new ContentValues();
-            boolean singleQuery = (db == null || !db.isOpen());
-            if(singleQuery) open();
+
             try {
                 while((row = br.readLine()) != null){
                     String[] values = row.split(",");
@@ -179,12 +174,10 @@ public class DatabaseManager {
                 Log.wtf(TAG,"Error reading station on line "+row, e);
                 e.printStackTrace();
             }
-            if(singleQuery) close();
         }
 
-        // TODO:
-        public List<RadioStation> getRadioStations() {
-            Cursor c = rawQuery("SELECT * FROM "+StationTable.TABLE_NAME+";");
+        List<RadioStation> getRadioStations() {
+            Cursor c = db.rawQuery("SELECT * FROM "+StationTable.TABLE_NAME+";", null);
             c.moveToFirst();
             List<RadioStation> rs = new ArrayList<>();
             while (!c.isAfterLast()){
@@ -195,53 +188,43 @@ public class DatabaseManager {
                 ));
                 c.moveToNext();
             }
+            c.close();
             return rs;
         }
-        public RadioStation getStation(String station) {
-            Cursor c = rawQuery("SELECT * FROM " + StationTable.TABLE_NAME + " WHERE " + StationTable.COLUMN_NAME + "=" + station + ";");
-            if (c.moveToFirst())
-                return radioStationFromCursor(c);
-            else
-                return null;
-        }
 
-        public String getStationLink(int id) {
-            Cursor c = rawQuery("SELECT "+StationTable.COLUMN_LINK+" FROM "+StationTable.TABLE_NAME+
-                    " WHERE "+StationTable.COLUMN_ID+"="+id);
-            c.moveToFirst();
-            if(c.isAfterLast()) return null;
-            else return c.getString(c.getColumnIndex(StationTable.COLUMN_LINK));
-        }
-
-        private RadioStation radioStationFromCursor(Cursor c) {
-            return new RadioStation(
-                    c.getInt(c.getColumnIndex(StationTable.COLUMN_ID)),
-                    c.getString(c.getColumnIndex(StationTable.COLUMN_NAME)),
-                    c.getString(c.getColumnIndex(StationTable.COLUMN_LINK)));
+        String getStationLink(int id) {
+            Cursor c = db.rawQuery("SELECT "+StationTable.COLUMN_LINK+" FROM "+StationTable.TABLE_NAME+
+                    " WHERE "+StationTable.COLUMN_ID+"="+id, null);
+            String name = null;
+            if(c.moveToFirst()) {
+                name = c.getString(c.getColumnIndex(StationTable.COLUMN_LINK));
+            }
+            c.close();
+            return name;
         }
 
 
         /****************************
          | ALARM TABLE AND HANDLERS |
          ****************************/
-        public final class AlarmTable {
-            public static final String TABLE_NAME = "alarms";
+        final static class AlarmTable {
+            static final String TABLE_NAME = "alarms";
 
-            public static final String COLUMN_ID = "_id";
-            public static final String COLUMN_ACTIVE = "_active";
-            public static final String COLUMN_HOUR = "_hour";
-            public static final String COLUMN_MINUTE = "_minute";
-            public static final String COLUMN_MON = "_mon";
-            public static final String COLUMN_TUE = "_tue";
-            public static final String COLUMN_WED = "_wed";
-            public static final String COLUMN_THU = "_thu";
-            public static final String COLUMN_FRI = "_fri";
-            public static final String COLUMN_SAT = "_sat";
-            public static final String COLUMN_SUN = "_sun";
-            public static final String COLUMN_STATION = "_station";
-            public static final String COLUMN_VOLUME = "_volume";
+            static final String COLUMN_ID = "_id";
+            static final String COLUMN_ACTIVE = "_active";
+            static final String COLUMN_HOUR = "_hour";
+            static final String COLUMN_MINUTE = "_minute";
+            static final String COLUMN_MON = "_mon";
+            static final String COLUMN_TUE = "_tue";
+            static final String COLUMN_WED = "_wed";
+            static final String COLUMN_THU = "_thu";
+            static final String COLUMN_FRI = "_fri";
+            static final String COLUMN_SAT = "_sat";
+            static final String COLUMN_SUN = "_sun";
+            static final String COLUMN_STATION = "_station";
+            static final String COLUMN_VOLUME = "_volume";
 
-            public static final String SQL_CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ( " +
+            static final String SQL_CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ( " +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_ACTIVE + " INTEGER DEFAULT 1, " +
                     COLUMN_HOUR + " INTEGER NOT NULL, " +
@@ -258,55 +241,102 @@ public class DatabaseManager {
                     "FOREIGN KEY("+COLUMN_STATION+") REFERENCES "+StationTable.TABLE_NAME+"("+StationTable.COLUMN_ID+")" +
                     ");";
 
-            public static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
+            static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
         }
 
-        public long addAlarm(Alarm alarm) {
-            Log.d(TAG, "Alarm " + alarm.get_id() + " added to database");
-            return insert(AlarmTable.TABLE_NAME, getAlarmValues(alarm));
+        private static int addAlarmFromBroadcast(Context context, Intent intent){
+            ContentValues cv = contentValuesFromBroadcastIntent(context, intent);
+            return (int) db.insert(AlarmTable.TABLE_NAME, null, cv);
         }
 
-        public void updateAlarm(Alarm alarm) {
-            update(AlarmTable.TABLE_NAME, getAlarmValues(alarm), AlarmTable.COLUMN_ID + "=" + alarm.get_id());
-            Log.d(TAG, "Alarm " + alarm.get_id() + " updated in database");
+        private static void updateAlarmFromBroadcast(Context context, Intent intent, int id){
+            ContentValues cv = contentValuesFromBroadcastIntent(context, intent);
+            db.update(AlarmTable.TABLE_NAME, cv, AlarmTable.COLUMN_ID+"="+id, null);
         }
 
+        private static ContentValues contentValuesFromBroadcastIntent(Context context, Intent intent){
+            boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_id_int),true);
+            int[] time = intent.getIntArrayExtra(context.getString(R.string.alarm_time_int_array));
+            boolean[] days = intent.getBooleanArrayExtra(context.getString(R.string.alarm_days_boolean_array));
+            int station = intent.getIntExtra(context.getString(R.string.station_id_int),0);
+            int volume = intent.getIntExtra(context.getString(R.string.alarm_volume_int),0);
+            ContentValues cv = new ContentValues();
+            cv.put(AlarmTable.COLUMN_ACTIVE, active ? 1:0);
+            cv.put(AlarmTable.COLUMN_HOUR, time[0]);
+            cv.put(AlarmTable.COLUMN_MINUTE, time[1]);
+            cv.put(AlarmTable.COLUMN_MON, days[0] ? 1:0);
+            cv.put(AlarmTable.COLUMN_TUE, days[1] ? 1:0);
+            cv.put(AlarmTable.COLUMN_WED, days[2] ? 1:0);
+            cv.put(AlarmTable.COLUMN_THU, days[3] ? 1:0);
+            cv.put(AlarmTable.COLUMN_FRI, days[4] ? 1:0);
+            cv.put(AlarmTable.COLUMN_SAT, days[5] ? 1:0);
+            cv.put(AlarmTable.COLUMN_SUN, days[6] ? 1:0);
+            cv.put(AlarmTable.COLUMN_STATION, station);
+            cv.put(AlarmTable.COLUMN_VOLUME, volume);
+            return cv;
+        }
 
-        public void deleteAlarm(int id) {
-            execSQL("DELETE FROM " + AlarmTable.TABLE_NAME + " WHERE " + AlarmTable.COLUMN_ID + " = " + id + ";");
+        private static void updateAlarmActive(int id, boolean active){
+            ContentValues cv = new ContentValues();
+            cv.put(AlarmTable.COLUMN_ACTIVE, active?1:0);
+            db.update(AlarmTable.TABLE_NAME, cv, AlarmTable.COLUMN_ID+"="+id, null);
+        }
+//
+//        private static void updateAlarm(Alarm alarm) {
+//            db.update(AlarmTable.TABLE_NAME, getAlarmValues(alarm), AlarmTable.COLUMN_ID + "=" + alarm.get_id(), null);
+//            Log.d(TAG, "Alarm " + alarm.get_id() + " updated in database");
+//        }
+
+        private static void deleteAlarm(int id) {
+            db.execSQL("DELETE FROM " + AlarmTable.TABLE_NAME + " WHERE " + AlarmTable.COLUMN_ID + " = " + id + ";");
             Log.d(TAG, "Alarm " + id + " deleted from database");
         }
 
-        public void deleteAlarm(Alarm alarm) {
-            deleteAlarm(alarm.get_id());
-        }
-
-        public Alarm getAlarm(int id) {
-            Cursor c = rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + " WHERE " + AlarmTable.COLUMN_ID + " = " + id + ";");
+        Alarm getAlarm(int id) {
+            Cursor c = db.rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + " WHERE " + AlarmTable.COLUMN_ID + " = " + id + ";", null);
+            Alarm alarm = null;
             if (c.moveToFirst()) {
-                return alarmFromCursor(c);
+                alarm = alarmFromCursor(c);
             }
-            return null;
+            c.close();
+            return alarm;
         }
 
-        public SparseArray<Alarm> getAllAlarms() {
+        SparseArray<Alarm> getAllAlarms() {
             SparseArray<Alarm> alarms = new SparseArray<>();
-            Cursor c = rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + ";");
+            Cursor c = db.rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + ";", null);
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 alarms.append(c.getInt(c.getColumnIndex(AlarmTable.COLUMN_ID)), alarmFromCursor(c));
                 c.moveToNext();
             }
+            c.close();
             return alarms;
         }
 
-        public Cursor getAlarmsCursor() {
-            return rawQuery("SELECT alarms._id, _active, _hour, _minute, _mon, _tue, _wed, _thu, _fri, _sat, _sun, _name FROM alarms JOIN stations ON alarms._station = stations._id;");
+        Cursor getAlarmsCursor() {
+            return db.rawQuery("SELECT "
+                    +AlarmTable.TABLE_NAME+"."+AlarmTable.COLUMN_ID
+                    +", "+AlarmTable.COLUMN_ACTIVE
+                    +", "+AlarmTable.COLUMN_HOUR
+                    +", "+AlarmTable.COLUMN_MINUTE
+                    +", "+AlarmTable.COLUMN_MON
+                    +", "+AlarmTable.COLUMN_TUE
+                    +", "+AlarmTable.COLUMN_WED
+                    +", "+AlarmTable.COLUMN_THU
+                    +", "+AlarmTable.COLUMN_FRI
+                    +", "+AlarmTable.COLUMN_SAT
+                    +", "+AlarmTable.COLUMN_SUN
+                    +", "+StationTable.COLUMN_NAME
+                    +" FROM "+AlarmTable.TABLE_NAME+" JOIN "+StationTable.TABLE_NAME
+                    +" ON "+ AlarmTable.TABLE_NAME+"."+AlarmTable.COLUMN_STATION+" = "+StationTable.TABLE_NAME+"."+StationTable.COLUMN_ID+";"
+                    , null);
+//            return rawQuery("SELECT alarms._id, _active, _hour, _minute, _mon, _tue, _wed, _thu, _fri, _sat, _sun, _name FROM alarms JOIN stations ON alarms._station = stations._id;");
 //            return rawQuery("SELECT * FROM " + AlarmTable.TABLE_NAME + ";");
         }
 
-        private ContentValues getAlarmValues(Alarm alarm) {
+        private static ContentValues getAlarmValues(Alarm alarm) {
             ContentValues values = new ContentValues();
             values.put(AlarmTable.COLUMN_HOUR, alarm.get_hour());
             values.put(AlarmTable.COLUMN_ACTIVE, alarm.is_active() ? 1 : 0);
@@ -323,7 +353,7 @@ public class DatabaseManager {
             return values;
         }
 
-        private Alarm alarmFromCursor(Cursor c) {
+        private static Alarm alarmFromCursor(Cursor c) {
             return new Alarm(
                     c.getInt(c.getColumnIndex(AlarmTable.COLUMN_ID)),
                     c.getInt(c.getColumnIndex(AlarmTable.COLUMN_ACTIVE)) == 1,

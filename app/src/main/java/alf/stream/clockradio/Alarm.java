@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -18,6 +19,12 @@ import static android.content.Context.ALARM_SERVICE;
  */
 
 public class Alarm {
+
+    public static final int FLAG_CREATE = 1;
+    public static final int FLAG_ACTIVE_CHANGE = 2;
+    public static final int FLAG_UPDATE = 3;
+    public static final int FLAG_DELETE = 4;
+
     private static final String TAG = "Alarm";
     private int _id;
     private boolean _active;
@@ -27,6 +34,7 @@ public class Alarm {
     private int _station;
     private int _volume;
 
+    private Calendar alarmTime;
 
     // Constructor
 
@@ -45,6 +53,7 @@ public class Alarm {
         activeDays.append(Calendar.SUNDAY,_sun);
         this._station = _station;
         this._volume = _volume;
+        updateAlarmTime();
     }
 
 
@@ -108,41 +117,11 @@ public class Alarm {
         this._id = _id;
     }
 
-//    @Override
-//    public String toString() {
-//        return "Alarm{" +
-//                "_id=" + _id +
-//                ", _active=" + _active +
-//                ", _hour=" + _hour +
-//                ", _minute=" + _minute +
-//                ", _mon=" + get_mon() +
-//                ", _tue=" + get_tue() +
-//                ", _wed=" + get_wed() +
-//                ", _thu=" + get_thu() +
-//                ", _fri=" + get_fri() +
-//                ", _sat=" + get_sat() +
-//                ", _sun=" + get_sun() +
-//                ", _station=" + _station +
-//                ", _volume=" + _volume +
-//                '}';
-//    }
-
 
     // Alarm Handling
 
-    // If no days are checked, treat it as a one time event.
-    public void resetAlarm(Context context) {
-        if(get_mon() || get_tue() || get_wed() || get_thu() || get_fri() || get_sat() ||get_sun()){
-            setAlarm(context);
-        }
-        else{
-            _active = false;
-        }
-    }
-
-    public void setAlarm(Context context) {
-        _active = true;
-        Calendar alarmTime = Calendar.getInstance();
+    private void updateAlarmTime() {
+        alarmTime = Calendar.getInstance();
         alarmTime.set(Calendar.HOUR_OF_DAY, _hour);
         alarmTime.set(Calendar.MINUTE, _minute);
         alarmTime.set(Calendar.SECOND, 0);
@@ -150,123 +129,13 @@ public class Alarm {
 
         Calendar now = Calendar.getInstance();
 
-        int activeInDays = activeInDays(now, 0);
-        int activeInDaysAfterToday = activeInDays(now, 1);
-
-        if(alarmTime.before(now))
-            alarmTime.add(Calendar.DAY_OF_YEAR,Math.abs(activeInDaysAfterToday));
-        else if(activeInDays > 0 && alarmTime.after(now))
-            alarmTime.add(Calendar.DAY_OF_YEAR,activeInDays);
-
-//        if(activeInDays == 0 && now.after(alarmTime))
-//            activeInDays = activeInDays(now,1);
-//
-//        if(activeInDays == -1 && now.after(alarmTime)){
-//            Log.d(TAG,"A: activeInDays="+activeInDays);
-//            alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//        }
-//        else if(!((activeInDays == 0 || activeInDays == -1) && now.before(alarmTime))){
-//            Log.d(TAG,"B: activeInDays="+activeInDays);
-//            activeInDays = activeInDays(now, 1);
-//            Log.d(TAG,"C: activeInDays="+activeInDays);
-//            alarmTime.add(Calendar.DAY_OF_YEAR, activeInDays);
-//        }
-
-//        // make sure that alarmTime is in the future
-//        while(alarmTime.compareTo(now) <= 0){
-//            alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//        }
-//
-//        // TODO: This should not be so many lines of code
-//        switch(now.get(Calendar.DAY_OF_WEEK)){
-//            case Calendar.MONDAY:
-//                if(_mon) ;
-//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-//                break;
-//
-//            case Calendar.TUESDAY:
-//                if(_tue) ;
-//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-//                break;
-//
-//            case Calendar.WEDNESDAY:
-//                if(_wed) ;
-//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-//                break;
-//
-//            case Calendar.THURSDAY:
-//                if(_thu) ;
-//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-//                break;
-//
-//            case Calendar.FRIDAY:
-//                if(_fri) ;
-//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-//                break;
-//
-//
-//            case Calendar.SATURDAY:
-//                if(_sat) ;
-//                else if(_sun) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-//                break;
-//
-//
-//            case Calendar.SUNDAY:
-//                if(_sun) ;
-//                else if(_mon) alarmTime.add(Calendar.DAY_OF_YEAR,1);
-//                else if(_tue) alarmTime.add(Calendar.DAY_OF_YEAR,2);
-//                else if(_wed) alarmTime.add(Calendar.DAY_OF_YEAR,3);
-//                else if(_thu) alarmTime.add(Calendar.DAY_OF_YEAR,4);
-//                else if(_fri) alarmTime.add(Calendar.DAY_OF_YEAR,5);
-//                else if(_sat) alarmTime.add(Calendar.DAY_OF_YEAR,6);
-//                break;
-//        }
-//
-
-        Intent alarmIntent = new Intent(context, AlarmReceiver.class);
-        alarmIntent.putExtra(context.getString(R.string.alarm_id_int),_id);
-        AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.set(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent);
-
-        LocalBroadcastManager.getInstance(context).sendBroadcast(
-                new Intent(context.getString(R.string.alarm_set_filter))
-                        .putExtra(context.getString(R.string.station_id_int),_station)
-                        .putExtra(context.getString(R.string.alarm_active_boolean),true)
-                        .putExtra(context.getString(R.string.alarm_time_string),String.format(Locale.getDefault(),"%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime))
-        );
-
-        Log.i(TAG,"Set alarm "+_id+" to play " + String.format(Locale.getDefault(),"%1$tA %1$tb %1$td %1$tY at %1$tH:%1$tM", alarmTime));
+        if(alarmTime.before(now))   // Alarm time is the next active day AFTER today
+            alarmTime.add(Calendar.DAY_OF_YEAR,Math.abs(activeInDays(now, 1))); // abs because -1 is returned if no days are active, which means alarm is only active once.
+        else {
+            int activeInDays = activeInDays(now, 0);
+            if(activeInDays > 0 && alarmTime.after(now))
+                alarmTime.add(Calendar.DAY_OF_YEAR,activeInDays);
+        }
     }
 
     public int activeInDays(Calendar now, int after){
@@ -281,26 +150,77 @@ public class Alarm {
         return -1;
     }
 
-    private String calendarString(Calendar c){
-        return String.format(Locale.getDefault(),"%02d:%02d - %d / %d",
-                c.get(Calendar.HOUR_OF_DAY),
-                c.get(Calendar.MINUTE),
-                c.get(Calendar.DAY_OF_YEAR),
-                c.get(Calendar.YEAR));
+    public void setAlarm(Context context, boolean showToast) {
+        updateAlarmTime();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ((AlarmManager) context.getSystemService(ALARM_SERVICE)).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent(context));
+        }
+        else {
+            ((AlarmManager) context.getSystemService(ALARM_SERVICE)).setExact(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent(context));
+        }
+
+        Log.i(TAG,"Set alarm "+_id+" to play " + getAlarmTimeString());
+
+        if(!_active) {
+            _active = true;
+            sendChangedBroadcast(context, FLAG_ACTIVE_CHANGE, showToast);
+        }
     }
 
-    public void cancelAlarm(Context context){
-        _active = false;
-        Log.i(TAG,"Canceled alarm " + _id + " with address "+this);
-        Intent alarmIntent = new Intent(context, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarmManager =  (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
+    public void unsetAlarm(Context context, boolean showToast){
+        ((AlarmManager) context.getSystemService(ALARM_SERVICE)).cancel(pendingIntent(context));
 
-        LocalBroadcastManager.getInstance(context).sendBroadcast(
-                new Intent(context.getString(R.string.alarm_set_filter))
-                        .putExtra(context.getString(R.string.alarm_id_int),_id)
-                        .putExtra(context.getString(R.string.alarm_active_boolean),false)
-        );
+        Log.i(TAG,"Unset alarm " + _id);
+
+        if(_active) {
+            _active = false;
+            sendChangedBroadcast(context, FLAG_ACTIVE_CHANGE, showToast);
+        }
     }
+
+    public void resetAlarm(Context context) {
+        if(get_mon() || get_tue() || get_wed() || get_thu() || get_fri() || get_sat() ||get_sun()){
+            setAlarm(context, false);
+        }
+        else { // If no days are checked, treat it as a one time event.
+            unsetAlarm(context, false);
+        }
+    }
+
+    public void delete(Context context) {
+        ((AlarmManager) context.getSystemService(ALARM_SERVICE)).cancel(pendingIntent(context));
+        Log.i(TAG, "Delete alarm "+ _id);
+        sendChangedBroadcast(context, FLAG_DELETE, true);
+    }
+
+    private PendingIntent pendingIntent(Context context){
+        Intent alarmIntent = new Intent(context, AlarmReceiver.class)
+                .putExtra(context.getString(R.string.alarm_id_int),_id)
+                .setPackage(context.getPackageName());
+        return PendingIntent.getBroadcast(context,_id,alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public String getAlarmTimeString(){
+        Calendar now = Calendar.getInstance();
+        switch(alarmTime.get(Calendar.DAY_OF_YEAR)-now.get(Calendar.DAY_OF_YEAR)){
+            case 0: return String.format(Locale.getDefault(),"Today at %1$tH:%1$tM", alarmTime);
+            case 1: return String.format(Locale.getDefault(),"Tomorrow at %1$tH:%1$tM", alarmTime);
+            default: return String.format(Locale.getDefault(),"%1$tA %1$tb %1$td at %1$tH:%1$tM", alarmTime);
+        }
+
+    }
+
+    // Broadcast
+
+    private void sendChangedBroadcast(Context context, int flag, boolean showToast){
+        LocalBroadcastManager.getInstance(context)
+                .sendBroadcast(new Intent(context.getString(R.string.alarm_changed_filter))
+                        .putExtra(context.getString(R.string.alarm_id_int), _id)
+                        .putExtra(context.getString(R.string.alarm_changed_flag), flag)
+                        .putExtra(context.getString(R.string.alarm_active_boolean), _active)
+                        .putExtra(context.getString(R.string.show_toast_boolean), showToast)
+                );
+    }
+
 }

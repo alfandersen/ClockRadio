@@ -9,9 +9,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.SeekBar;
@@ -50,9 +50,10 @@ public class EditAlarmActivity extends AppCompatActivity {
         intent = getIntent();
 
         // Get alarm if it exists in the database
-        databaseHelper = DatabaseManager.DatabaseHelper.getInstance(context);
+//        databaseHelper = DatabaseManager.DatabaseHelper.getInstance(context);
         int alarmId = intent.getIntExtra(getString(R.string.alarm_id_int), -1);
-        alarm = databaseHelper.getAlarm(alarmId);
+//        alarm = databaseHelper.getAlarm(alarmId);
+        alarm = OverviewActivity.getAlarms().get(alarmId);
         mode = alarm == null ? CREATING : EDITING;
 
         // Setup UI Elements
@@ -143,21 +144,11 @@ public class EditAlarmActivity extends AppCompatActivity {
 
     private void setupStationSpinners() {
         stationSpinner = (Spinner) findViewById(R.id.stationSpinner_EditAlarm);
-//        ArrayAdapter<CharSequence> stationAdapter = ArrayAdapter.createFromResource(context, R.array.station_names, android.R.layout.simple_spinner_item);
-//        ArrayAdapter<RadioStation> stationAdapter = new ArrayAdapter<RadioStation>(context, R.layout.station_spinner_item, radioStations);
         StationAdapter stationAdapter = OverviewActivity.getStationAdapter();
-//        stationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stationSpinner.setAdapter(stationAdapter);
-        stationSpinner.setOnItemSelectedListener(stationSelectedListener);
-
-//        regionSpinner = (Spinner) findViewById(R.id.regionSpinner_EditAlarm);
-//        ArrayAdapter<CharSequence> regionAdapter = ArrayAdapter.createFromResource(context, R.array.region_names, android.R.layout.simple_spinner_item);
-//        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        regionSpinner.setAdapter(regionAdapter);
 
         if(mode == EDITING) {
             stationSpinner.setSelection(stationAdapter.getIdPosition(alarm.get_station()));
-//            regionSpinner.setSelection(alarm.get_region());
         }
         else {
             stationSpinner.setSelection(PreferenceManager
@@ -212,15 +203,12 @@ public class EditAlarmActivity extends AppCompatActivity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                alarm = createAlarm();
+                LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
                 if(mode == CREATING)
-                    alarm.set_id((int) databaseHelper.addAlarm(alarm));
-                else
-                    databaseHelper.updateAlarm(alarm);
-
-                if(alarm.get_id() != -1 && alarm.is_active())
-                    alarm.setAlarm(context);
-
+                    lbm.sendBroadcast(createAlarmIntent());
+                else {
+                    lbm.sendBroadcast(updateAlarmIntent());
+                }
                 finish();
             }
         });
@@ -236,34 +224,31 @@ public class EditAlarmActivity extends AppCompatActivity {
         });
     }
 
-    private Alarm createAlarm(){
-        return new Alarm(
-                alarm == null ? -1 : alarm.get_id(),
-                alarm == null || alarm.is_active(),
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? timePicker.getHour(): timePicker.getCurrentHour(),
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? timePicker.getMinute(): timePicker.getCurrentMinute(),
-                monTextView.isChecked(), tueTextView.isChecked(), wedTextView.isChecked(),
-                thuTextView.isChecked(), friTextView.isChecked(), satTextView.isChecked(), sunTextView.isChecked(),
-                (int)((RadioStation)stationSpinner.getSelectedItem()).get_id(), //TODO: Remember to change when I make distinct region spinner (should probably get from database)
-                volumeBar.getProgress()
-        );
+    private Intent createAlarmIntent(){
+        return makeIntent()
+                .putExtra(context.getString(R.string.alarm_changed_flag), Alarm.FLAG_CREATE);
     }
 
-    private AdapterView.OnItemSelectedListener stationSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//            if(stationSpinner != null && adapterView.equals(stationSpinner) && stationSpinner.getChildCount() > 0) {
-//                ((TextView) stationSpinner.getChildAt(0)).setTextColor(ContextCompat.getColor(context, R.color.white));
-//            }
-            // TODO: Distinct region spinner
-//            String selection = getResources().getStringArray(R.array.station_links)[i];
-//            if(selection.startsWith("P4"))
-//                regionSpinner.setVisibility(Spinner.VISIBLE);
-//            else
-//                regionSpinner.setVisibility(Spinner.INVISIBLE);
-        }
+    private Intent updateAlarmIntent(){
+        return makeIntent()
+                .putExtra(context.getString(R.string.alarm_changed_flag), Alarm.FLAG_UPDATE)
+                .putExtra(context.getString(R.string.alarm_id_int),alarm.get_id())
+                .putExtra(context.getString(R.string.alarm_active_boolean), alarm.is_active());
+    }
 
-        @Override
-        public void onNothingSelected(AdapterView<?> adapterView) {}
-    };
+    private Intent makeIntent(){
+        return new Intent(context.getString(R.string.alarm_changed_filter))
+                .putExtra(context.getString(R.string.show_toast_boolean), true)
+                .putExtra(context.getString(R.string.alarm_time_int_array),
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
+                                new int[] {timePicker.getHour(), timePicker.getMinute()} :
+                                new int[] {timePicker.getCurrentHour(),timePicker.getCurrentMinute()}
+                )
+                .putExtra(context.getString(R.string.alarm_days_boolean_array),
+                        new boolean[] {monTextView.isChecked(), tueTextView.isChecked(), wedTextView.isChecked(),
+                                thuTextView.isChecked(), friTextView.isChecked(), satTextView.isChecked(), sunTextView.isChecked()}
+                )
+                .putExtra(context.getString(R.string.station_id_int), ((RadioStation)stationSpinner.getSelectedItem()).get_id())
+                .putExtra(context.getString(R.string.alarm_volume_int), volumeBar.getProgress());
+    }
 }

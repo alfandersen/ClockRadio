@@ -20,13 +20,18 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int), -1);
         DatabaseManager.DatabaseHelper databaseHelper = DatabaseManager.DatabaseHelper.getInstance(context);
+        databaseHelper.openDatabase();
         Alarm alarm = databaseHelper.getAlarm(alarmId);
 
         // Should be redundant, but for good measure check if the alarm is suppose to sound.
         if(alarm != null && alarm.is_active()) {
+            PackageManager pm = context.getPackageManager();
+            Intent launchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
+            context.startActivity(launchIntent);
+
             Log.i(TAG, "Start Alarm "+alarm.get_id());
 
-            AudioManager am = (AudioManager) context.getSystemService(context.AUDIO_SERVICE);
+            AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             am.setStreamVolume(AudioManager.STREAM_MUSIC, alarm.get_volume(), 0);
 
             String stationLink = databaseHelper.getStationLink(alarm.get_station());
@@ -34,10 +39,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             Intent radioIntent = new Intent(context, RadioService.class);
             radioIntent.putExtra(context.getString(R.string.station_path_string), stationLink);
             context.startService(radioIntent);
-
-            PackageManager pm = context.getPackageManager();
-            Intent launchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
-            context.startActivity(launchIntent);
 
             alarm.resetAlarm(context);
         }
