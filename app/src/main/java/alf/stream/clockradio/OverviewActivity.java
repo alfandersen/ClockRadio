@@ -37,9 +37,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     // Broadcast Receivers
     private LocalBroadcastManager localBroadcastManager;
-    private BroadcastReceiver loadingReceiver;
-    private BroadcastReceiver playStartedReceiver;
-    private BroadcastReceiver playStoppedReceiver;
+    private BroadcastReceiver radioReceiver;
     private BroadcastReceiver databaseChangedReceiver;
 
     // UI Elements
@@ -78,9 +76,7 @@ public class OverviewActivity extends AppCompatActivity {
 
         // Setup Broadcast Receiver
         localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        setupLoadingReceiver();
-        setupPlayStartedReceiver();
-        setupPlayStoppedReceiver();
+        setupRadioReceiver();
         setupDatabaseChangedReceiver();
     }
 
@@ -109,9 +105,7 @@ public class OverviewActivity extends AppCompatActivity {
         super.onDestroy();
 //        Log.i(TAG, "onDestroy()");
         radioHandler.unBind();
-        localBroadcastManager.unregisterReceiver(loadingReceiver);
-        localBroadcastManager.unregisterReceiver(playStartedReceiver);
-        localBroadcastManager.unregisterReceiver(playStoppedReceiver);
+        localBroadcastManager.unregisterReceiver(radioReceiver);
         localBroadcastManager.unregisterReceiver(databaseChangedReceiver);
         databaseHelper.closeDatabase();
     }
@@ -213,53 +207,48 @@ public class OverviewActivity extends AppCompatActivity {
      * BroadcastReceivers *
      **********************/
 
-    private void setupLoadingReceiver() {
-        loadingReceiver = new BroadcastReceiver() {
+    private void setupRadioReceiver() {
+        radioReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if(intent.getBooleanExtra(context.getString(R.string.loading_station_boolean),false)) {
-                    playButton.setVisibility(ImageButton.GONE);
-                    loadingAnimation.setVisibility(ProgressBar.VISIBLE);
+                int flag = intent.getIntExtra(RadioService.BROADCAST_FLAG,-1);
+                if(flag == -1){
+                    Log.e(TAG,"RadioBroadcast with unknown flag");
+                    return;
+                }
+                switch(flag) {
+                    case RadioService.FLAG_LOADING :
+                        playButton.setVisibility(ImageButton.GONE);
+                        loadingAnimation.setVisibility(ProgressBar.VISIBLE);
+                        break;
+
+                    case RadioService.FLAG_PLAYING:
+                        loadingAnimation.setVisibility(ProgressBar.GONE);
+                        playButton.setVisibility(ImageButton.VISIBLE);
+                        playButton.setImageDrawable(getDrawable(R.drawable.ic_stop_circled));
+                        int stationIndex = radioHandler.getCurrentStation();
+                        if(stationSpinner.getSelectedItemPosition() != stationIndex){
+                            stationSpinner.setSelection(stationIndex);
+                            radioHandler.setStation(stationIndex);
+                        }
+                        break;
+
+                    case RadioService.FLAG_STOPPED:
+                        loadingAnimation.setVisibility(ProgressBar.GONE);
+                        playButton.setVisibility(ImageButton.VISIBLE);
+                        playButton.setImageDrawable(getDrawable(R.drawable.ic_play_circled));
+                        break;
                 }
             }
         };
-        localBroadcastManager.registerReceiver(loadingReceiver, new IntentFilter(context.getString(R.string.loading_station_filter)));
-    }
-
-    private void setupPlayStartedReceiver() {
-        playStartedReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                loadingAnimation.setVisibility(ProgressBar.GONE);
-                playButton.setVisibility(ImageButton.VISIBLE);
-                playButton.setImageDrawable(getDrawable(R.drawable.ic_stop_circled));
-                int stationIndex = radioHandler.getCurrentStation();
-                if(stationSpinner.getSelectedItemPosition() != stationIndex){
-                    stationSpinner.setSelection(stationIndex);
-                    radioHandler.setStation(stationIndex);
-                }
-            }
-        };
-        localBroadcastManager.registerReceiver(playStartedReceiver, new IntentFilter(context.getString(R.string.play_started_filter)));
-    }
-
-    private void setupPlayStoppedReceiver() {
-        playStoppedReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                loadingAnimation.setVisibility(ProgressBar.GONE);
-                playButton.setVisibility(ImageButton.VISIBLE);
-                playButton.setImageDrawable(getDrawable(R.drawable.ic_play_circled));
-            }
-        };
-        localBroadcastManager.registerReceiver(playStoppedReceiver, new IntentFilter(context.getString(R.string.play_stopped_filter)));
+        localBroadcastManager.registerReceiver(radioReceiver, new IntentFilter(RadioService.BROADCAST_FILTER));
     }
 
     private void setupDatabaseChangedReceiver() {
         databaseChangedReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                int flag = intent.getIntExtra(context.getString(R.string.alarm_changed_flag),-1);
+                int flag = intent.getIntExtra(Alarm.BROADCAST_FLAG,-1);
                 int alarmId = intent.getIntExtra(context.getString(R.string.alarm_id_int),-1);
                 boolean showToast = intent.getBooleanExtra(context.getString(R.string.show_toast_boolean),false);
 
@@ -303,7 +292,7 @@ public class OverviewActivity extends AppCompatActivity {
                 }
             }
         };
-        localBroadcastManager.registerReceiver(databaseChangedReceiver, new IntentFilter(context.getString(R.string.database_changed_filter)));
+        localBroadcastManager.registerReceiver(databaseChangedReceiver, new IntentFilter(DatabaseManager.DatabaseHelper.BROADCAST_FILTER));
     }
 
     String alarmSetToast(Alarm alarm){

@@ -15,10 +15,17 @@ import android.util.Log;
  */
 
 public class RadioService extends Service {
+    public static final int FLAG_LOADING = 1;
+    public static final int FLAG_PLAYING = 2;
+    public static final int FLAG_STOPPED = 3;
+    public static final String BROADCAST_FILTER = "radio_service_filter";
+    public static final String BROADCAST_FLAG = "radio_service_flag";
+
     private static final String TAG = "RadioService";
     private static MediaPlayer player;
     private static String stationUrl;
     private Context context;
+    private LocalBroadcastManager lbm;
 
     public static boolean isPlaying(){
         return player != null && player.isPlaying();
@@ -33,6 +40,7 @@ public class RadioService extends Service {
         super.onCreate();
 //        Log.i(TAG, "onCreate()");
         context = getApplicationContext();
+        lbm = LocalBroadcastManager.getInstance(context);
     }
 
     /**
@@ -59,11 +67,9 @@ public class RadioService extends Service {
             @Override
             public void run() {
                 if(stationUrl != null) {
-                    LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
                     stopPlayer();
 
-                    lbm.sendBroadcast(new Intent(context.getString(R.string.loading_station_filter))
-                                    .putExtra(context.getString(R.string.loading_station_boolean),true));
+                    lbm.sendBroadcast(new Intent(BROADCAST_FILTER).putExtra(BROADCAST_FLAG,FLAG_LOADING));
 
                     player = MediaPlayer.create(context, Uri.parse(stationUrl));
 
@@ -71,9 +77,7 @@ public class RadioService extends Service {
                         Log.i(TAG, "startPlayer()");
                         player.start();
 
-                        lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_started_filter)));
-                        lbm.sendBroadcast(new Intent(getResources().getString(R.string.loading_station_filter))
-                                .putExtra(getResources().getString(R.string.loading_station_boolean), false));
+                        lbm.sendBroadcast(new Intent(BROADCAST_FILTER).putExtra(BROADCAST_FLAG,FLAG_PLAYING));
 
                         player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
@@ -84,7 +88,7 @@ public class RadioService extends Service {
                     }
                     else{
                         Log.e(TAG, "Player couldn't start! Reason: Mediaplayer.create() returned null.");
-                        lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_stopped_filter)));
+                        lbm.sendBroadcast(new Intent(BROADCAST_FILTER).putExtra(BROADCAST_FLAG,FLAG_STOPPED));
                     }
                 }
             }
@@ -93,8 +97,7 @@ public class RadioService extends Service {
 
     private void stopPlayer(){
         if(player != null && player.isPlaying()) {
-            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
-            lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_stopped_filter)));
+            lbm.sendBroadcast(new Intent(BROADCAST_FILTER).putExtra(BROADCAST_FLAG,FLAG_STOPPED));
             Log.i(TAG, "stopPlayer()");
             player.stop();
         }

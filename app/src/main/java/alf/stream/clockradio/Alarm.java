@@ -23,6 +23,9 @@ public class Alarm {
     public static final int FLAG_ACTIVE_CHANGE = 2;
     public static final int FLAG_UPDATE = 3;
     public static final int FLAG_DELETE = 4;
+    public static final String BROADCAST_FILTER = "alarm_change_filter";
+    public static final String BROADCAST_FLAG = "alarm_change_flag";
+
 
     private static final String TAG = "Alarm";
     private int _id;
@@ -218,9 +221,9 @@ public class Alarm {
 
     private void sendChangedBroadcast(Context context, int flag, boolean showToast){
         LocalBroadcastManager.getInstance(context)
-                .sendBroadcast(new Intent(context.getString(R.string.alarm_changed_filter))
+                .sendBroadcast(new Intent(BROADCAST_FILTER)
                         .putExtra(context.getString(R.string.alarm_id_int), _id)
-                        .putExtra(context.getString(R.string.alarm_changed_flag), flag)
+                        .putExtra(BROADCAST_FLAG, flag)
                         .putExtra(context.getString(R.string.alarm_active_boolean), _active)
                         .putExtra(context.getString(R.string.show_toast_boolean), showToast)
                 );

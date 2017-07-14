@@ -27,6 +27,7 @@ import java.util.List;
 class DatabaseManager {
 
     static class DatabaseHelper extends SQLiteOpenHelper {
+        public static final String BROADCAST_FILTER = "database_helper_filter";
         private static DatabaseHelper instance = null;
         private static SQLiteDatabase db = null;
         private static final String TAG = "DatabaseHelper";
@@ -47,7 +48,7 @@ class DatabaseManager {
                 broadcastReceiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        int flag = intent.getIntExtra(context.getString(R.string.alarm_changed_flag),-1);
+                        int flag = intent.getIntExtra(Alarm.BROADCAST_FLAG,-1);
                         if(flag == -1) Log.e(TAG,"Alarm changed broadcast without a flag!!");
                         else Log.d(TAG,"Alarm changed broadcast with flag "+flag);
 
@@ -78,14 +79,14 @@ class DatabaseManager {
                         if(changed) {
                             boolean showToast = intent.getBooleanExtra(context.getString(R.string.show_toast_boolean), false);
                             LocalBroadcastManager.getInstance(context)
-                                    .sendBroadcast(new Intent(context.getString(R.string.database_changed_filter))
+                                    .sendBroadcast(new Intent(BROADCAST_FILTER)
+                                            .putExtra(Alarm.BROADCAST_FLAG, flag)
                                             .putExtra(context.getString(R.string.alarm_id_int), alarmId)
-                                            .putExtra(context.getString(R.string.alarm_changed_flag), flag)
                                             .putExtra(context.getString(R.string.show_toast_boolean),showToast));
                         }
                     }
                 };
-                LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, new IntentFilter(context.getString(R.string.alarm_changed_filter)));
+                LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, new IntentFilter(Alarm.BROADCAST_FILTER));
             }
             return instance;
         }

@@ -226,18 +226,18 @@ public class EditAlarmActivity extends AppCompatActivity {
 
     private Intent createAlarmIntent(){
         return makeIntent()
-                .putExtra(context.getString(R.string.alarm_changed_flag), Alarm.FLAG_CREATE);
+                .putExtra(Alarm.BROADCAST_FLAG, Alarm.FLAG_CREATE);
     }
 
     private Intent updateAlarmIntent(){
         return makeIntent()
-                .putExtra(context.getString(R.string.alarm_changed_flag), Alarm.FLAG_UPDATE)
+                .putExtra(Alarm.BROADCAST_FLAG, Alarm.FLAG_UPDATE)
                 .putExtra(context.getString(R.string.alarm_id_int),alarm.get_id())
                 .putExtra(context.getString(R.string.alarm_active_boolean), alarm.is_active());
     }
 
     private Intent makeIntent(){
-        return new Intent(context.getString(R.string.alarm_changed_filter))
+        return new Intent(Alarm.BROADCAST_FILTER)
                 .putExtra(context.getString(R.string.show_toast_boolean), true)
                 .putExtra(context.getString(R.string.alarm_time_int_array),
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
