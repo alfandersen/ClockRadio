@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,7 @@ class AlarmListAdapter extends CursorAdapter {
         activationCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                compoundButton.getRootView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 if(b)
                     OverviewActivity.getAlarms().get(alarmId).setAlarm(context, true);
                 else
@@ -79,6 +81,7 @@ class AlarmListAdapter extends CursorAdapter {
         deleteImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 OverviewActivity.getAlarms().get(alarmId).delete(context);
             }
         });

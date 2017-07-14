@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckedTextView;
@@ -126,6 +127,7 @@ public class EditAlarmActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             CheckedTextView tv = (CheckedTextView) view;
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             tv.setChecked(!tv.isChecked()); // Toggle checked
             updateDayTextView(tv);
         }
@@ -170,10 +172,12 @@ public class EditAlarmActivity extends AppCompatActivity {
 
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {}
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -203,6 +207,7 @@ public class EditAlarmActivity extends AppCompatActivity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
                 if(mode == CREATING)
                     lbm.sendBroadcast(createAlarmIntent());
@@ -219,6 +224,7 @@ public class EditAlarmActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 finish();
             }
         });

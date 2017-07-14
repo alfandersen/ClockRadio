@@ -10,6 +10,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:gravity="center_vertical"
+        android:paddingEnd="16dp"
         android:paddingStart="16dp"
         android:text="P6 Beat"
         android:textAllCaps="false"

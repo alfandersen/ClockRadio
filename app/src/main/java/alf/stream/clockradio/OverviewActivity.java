@@ -10,6 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -91,19 +92,11 @@ public class OverviewActivity extends AppCompatActivity {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
             Log.d(TAG, "Wakelock acquired");
         }
-//        Log.i(TAG, "onStart()");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-//        Log.i(TAG, "onStop()");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        Log.i(TAG, "onDestroy()");
         radioHandler.unBind();
         localBroadcastManager.unregisterReceiver(radioReceiver);
         localBroadcastManager.unregisterReceiver(databaseChangedReceiver);
@@ -144,8 +137,6 @@ public class OverviewActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 Intent intent = new Intent(getApplicationContext(), EditAlarmActivity.class);
-//                intent.putExtra(alarm.get_id());
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
                 return true;
             }
@@ -160,6 +151,7 @@ public class OverviewActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 Intent editIntent = new Intent(context, EditAlarmActivity.class);
                 editIntent.putExtra(context.getString(R.string.alarm_id_int),(int)alarmListAdapter.getItemId(i));
                 context.startActivity(editIntent);
@@ -169,12 +161,9 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void setupStationSpinners() {
         stationSpinner = (Spinner) findViewById(R.id.stationSpinner_Overview);
-//        ArrayAdapter<CharSequence> stationAdapter = ArrayAdapter.createFromResource(context, R.array.station_names, android.R.layout.simple_spinner_item);
-//        stationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stationSpinner.setAdapter(stationAdapter);
         stationSpinner.setSelection(radioHandler.getCurrentStation());
         stationSpinner.setOnItemSelectedListener(stationSelectedListener);
-
 
         //TODO: Distinct region spinner
 //        regionSpinner = (Spinner) findViewById(R.id.regionSpinner_Overview);
@@ -190,6 +179,7 @@ public class OverviewActivity extends AppCompatActivity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 if(radioHandler.isPlaying())
                     radioHandler.stopPlayBack();
                 else

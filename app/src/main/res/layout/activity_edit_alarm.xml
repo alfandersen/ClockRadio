@@ -1,135 +1,193 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="alf.stream.clockradio.EditAlarmActivity"
-    android:weightSum="1">
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:layout_weight="0.1" />
+    tools:context="alf.stream.clockradio.EditAlarmActivity">
 
     <TimePicker
         android:id="@+id/timePicker_EditAlarm"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="50dp"
         android:scaleX="1.5"
         android:scaleY="1.5"
         android:timePickerMode="spinner"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
     <Space
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:layout_weight="0.1" />
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_weight="0.1"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/timePicker_EditAlarm"
+        android:id="@+id/space"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/linearLayout5"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
         android:orientation="horizontal"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp">
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/space">
 
         <CheckedTextView
             android:id="@+id/monCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:checked="true"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
             android:text="Mon"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/off_bright"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <CheckedTextView
             android:id="@+id/tueCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:checked="true"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
             android:text="Tue"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/off_bright"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <CheckedTextView
             android:id="@+id/wedCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:checked="true"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
             android:text="Wed"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/off_bright"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <CheckedTextView
             android:id="@+id/thuCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:checked="true"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
             android:text="Thu"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/off_bright"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <CheckedTextView
             android:id="@+id/friCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:checked="true"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
             android:text="Fri"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/off_bright"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <CheckedTextView
             android:id="@+id/satCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:checked="true"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
             android:text="Sat"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/off_bright"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <CheckedTextView
             android:id="@+id/sunCheckedTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:checked="true"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp"
             android:text="Sun"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/off_bright"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/linearLayout4"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:orientation="horizontal">
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout5">
 
         <Spinner
             android:id="@+id/stationSpinner_EditAlarm"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -138,7 +196,7 @@
 
         <Spinner
             android:id="@+id/regionSpinner_EditAlarm"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:visibility="gone"
@@ -148,17 +206,25 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/linearLayout3"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:orientation="horizontal">
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
         <TextView
             android:id="@+id/volumeTextView_EditAlarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Volume:"
-            android:textSize="16sp" />
+            android:textSize="18sp" />
 
         <SeekBar
             android:id="@+id/volumeSeekBar_EditAlarm"
@@ -167,27 +233,51 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <Space
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:orientation="horizontal">
+        android:layout_marginBottom="0dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout4" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/linearLayout2">
 
         <Button
             android:id="@+id/okButton_EditAlarm"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="OK" />
+            android:text="OK"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
         <Button
             android:id="@+id/cancelButton_EditAlarm"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="Cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
 
     </LinearLayout>
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
