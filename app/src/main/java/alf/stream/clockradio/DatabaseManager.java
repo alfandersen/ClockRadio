@@ -256,7 +256,7 @@ class DatabaseManager {
         }
 
         private static ContentValues contentValuesFromBroadcastIntent(Context context, Intent intent){
-            boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_id_int),true);
+            boolean active = intent.getBooleanExtra(context.getString(R.string.alarm_active_boolean),true);
             int[] time = intent.getIntArrayExtra(context.getString(R.string.alarm_time_int_array));
             boolean[] days = intent.getBooleanArrayExtra(context.getString(R.string.alarm_days_boolean_array));
             int station = intent.getIntExtra(context.getString(R.string.station_id_int),0);

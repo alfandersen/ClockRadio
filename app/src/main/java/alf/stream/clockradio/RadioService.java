@@ -61,22 +61,31 @@ public class RadioService extends Service {
                 if(stationUrl != null) {
                     LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
                     stopPlayer();
+
                     lbm.sendBroadcast(new Intent(context.getString(R.string.loading_station_filter))
                                     .putExtra(context.getString(R.string.loading_station_boolean),true));
+
                     player = MediaPlayer.create(context, Uri.parse(stationUrl));
-                    Log.i(TAG, "startPlayer()");
-                    player.start();
 
-                    lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_started_filter)));
-                    lbm.sendBroadcast(new Intent(getResources().getString(R.string.loading_station_filter))
-                                    .putExtra(getResources().getString(R.string.loading_station_boolean),false));
+                    if(player != null) {
+                        Log.i(TAG, "startPlayer()");
+                        player.start();
 
-                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mediaPlayer) {
-                            startPlayer();
-                        }
-                    });
+                        lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_started_filter)));
+                        lbm.sendBroadcast(new Intent(getResources().getString(R.string.loading_station_filter))
+                                .putExtra(getResources().getString(R.string.loading_station_boolean), false));
+
+                        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mediaPlayer) {
+                                startPlayer();
+                            }
+                        });
+                    }
+                    else{
+                        Log.e(TAG, "Player couldn't start! Reason: Mediaplayer.create() returned null.");
+                        lbm.sendBroadcast(new Intent(getResources().getString(R.string.play_stopped_filter)));
+                    }
                 }
             }
         }).start();

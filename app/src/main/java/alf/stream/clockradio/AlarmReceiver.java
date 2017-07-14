@@ -25,6 +25,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         // Should be redundant, but for good measure check if the alarm is suppose to sound.
         if(alarm != null && alarm.is_active()) {
+
             PackageManager pm = context.getPackageManager();
             Intent launchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
             context.startActivity(launchIntent);
@@ -39,8 +40,11 @@ public class AlarmReceiver extends BroadcastReceiver {
             Intent radioIntent = new Intent(context, RadioService.class);
             radioIntent.putExtra(context.getString(R.string.station_path_string), stationLink);
             context.startService(radioIntent);
+            Log.d(TAG, "Radioservice started. Waiting for player to start...");
 
             alarm.resetAlarm(context);
+
+//            wl.release();
         }
         else{
             Log.w(TAG, "Alarm "+alarmId+" not started because "+(alarm == null ? "alarm was not found in database." : "alarm is not active."));

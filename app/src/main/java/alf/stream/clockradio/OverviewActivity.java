@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -50,6 +52,7 @@ public class OverviewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 //        Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_overview);
 //        context = getApplicationContext();
@@ -84,6 +87,14 @@ public class OverviewActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        if(!powerManager.isInteractive()) {
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
+            wakeLock.acquire(60000);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+            Log.d(TAG, "Wakelock acquired");
+        }
 //        Log.i(TAG, "onStart()");
     }
 
@@ -268,16 +279,20 @@ public class OverviewActivity extends AppCompatActivity {
                                 if (alarms.get(alarmId).is_active())
                                     Toast.makeText(context, alarmSetToast(alarms.get(alarmId)), Toast.LENGTH_LONG).show();
                                 else
-                                    Toast.makeText(context, "Alarm canceled.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "Alarm set inactive.", Toast.LENGTH_SHORT).show();
                             } else
                                 setupListView();
                             break;
 
                         case Alarm.FLAG_UPDATE:
                             setupListView();
-                            if(alarms.get(alarmId).is_active())
-                                alarms.get(alarmId).setAlarm(context,false);
-                            Toast.makeText(context, "Alarm updated. " + alarmSetToast(alarms.get(alarmId)), Toast.LENGTH_LONG).show();
+                            if(alarms.get(alarmId).is_active()) {
+                                alarms.get(alarmId).setAlarm(context, false);
+                                Toast.makeText(context, "Alarm updated. " + alarmSetToast(alarms.get(alarmId)), Toast.LENGTH_LONG).show();
+                            }
+                            else {
+                                Toast.makeText(context, "Inactive alarm updated.",Toast.LENGTH_SHORT).show();
+                            }
                             break;
 
                         case Alarm.FLAG_DELETE:

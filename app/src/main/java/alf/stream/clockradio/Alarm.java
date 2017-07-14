@@ -4,7 +4,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -152,13 +151,17 @@ public class Alarm {
 
     public void setAlarm(Context context, boolean showToast) {
         updateAlarmTime();
+        Intent overviewIntent = new Intent(context,OverviewActivity.class);
+        PendingIntent overviewPendingIntent = PendingIntent.getActivity(context,_id,overviewIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(alarmTime.getTimeInMillis(),overviewPendingIntent);
+        ((AlarmManager) context.getSystemService(ALARM_SERVICE)).setAlarmClock(alarmClockInfo,pendingIntent(context));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ((AlarmManager) context.getSystemService(ALARM_SERVICE)).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent(context));
-        }
-        else {
-            ((AlarmManager) context.getSystemService(ALARM_SERVICE)).setExact(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent(context));
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            ((AlarmManager) context.getSystemService(ALARM_SERVICE)).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent(context));
+//        }
+//        else {
+//            ((AlarmManager) context.getSystemService(ALARM_SERVICE)).setExact(AlarmManager.RTC_WAKEUP,alarmTime.getTimeInMillis(),pendingIntent(context));
+//        }
 
         Log.i(TAG,"Set alarm "+_id+" to play " + getAlarmTimeString());
 
